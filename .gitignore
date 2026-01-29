@@ -1,0 +1,20 @@
+# build 폴더 무시
+build/
+logs/
+
+# 모든 하위 디렉토리에 있는 build 폴더 무시
+**/build/
+**/saved_imgs/
+**/*.pt
+imgs/
+**/__pycache__/
+.venv/
+
+# .vscode 설정 파일 무시
+.vscode/settings.json
+.vscode/launch.json
+.vscode/task.json
+
+**/compile_commands.json
+
+**/.cache/
