@@ -15,7 +15,7 @@
 #define THROWVAL(EXCEPTION, EVALUE, ...) \
     throw EXCEPTION(static_cast<const char *>(__FUNCTION__), __LINE__, false, EVALUE, fmt::format(__VA_ARGS__))
 
-namespace autocrypt
+namespace vp
 {
 
 class ExceptionBase : public std::exception
@@ -162,4 +162,4 @@ private:
 #endif
 };
 
-} // namespace autocrypt
+} // namespace vp

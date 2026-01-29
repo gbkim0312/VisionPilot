@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace autocrypt
+namespace vp
 {
 
 class ZipManager
@@ -42,4 +42,4 @@ private:
     std::string latest_error_str_{};
 };
 
-} // namespace autocrypt
+} // namespace vp

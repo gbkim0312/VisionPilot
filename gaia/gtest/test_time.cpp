@@ -8,7 +8,7 @@ namespace
 constexpr uint32_t k16092BaseTime = 1072915200;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(Time, time32)
@@ -58,4 +58,4 @@ TEST(Time, stringToTime32)
     ASSERT_EQ(time32, 0);
 }
 
-} // namespace autocrypt
+} // namespace vp

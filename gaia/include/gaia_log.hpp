@@ -4,7 +4,7 @@
 #include <string> // for string
 #include <vector> // for vector
 
-namespace autocrypt
+namespace vp
 {
 
 struct LogConfig
@@ -47,7 +47,7 @@ void logDeinit();
 // init log from argc and argv
 void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_ptr(const std::string &)> &sink_generator_cb = nullptr);
 } // namespace logger
-} // namespace autocrypt
+} // namespace vp
 
 #if !defined(LOG_ACTIVE_LEVEL)
 #define LOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
@@ -62,12 +62,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_TRA(...)                                                                                                                           \
     do                                                                                                                                         \
     {                                                                                                                                          \
-        using autocrypt::logger::_global::spdlog_level;                                                                                        \
-        using autocrypt::logger::_global::logger;                                                                                              \
+        using vp::logger::_global::spdlog_level;                                                                                               \
+        using vp::logger::_global::logger;                                                                                                     \
         if (spdlog_level <= SPDLOG_LEVEL_TRACE)                                                                                                \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::trace, __VA_ARGS__); \
     } while (0)
-#define LOG_TRA_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::trace, __VA_ARGS__)
+#define LOG_TRA_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::trace, __VA_ARGS__)
 #else
 #define LOG_TRA(...) (void)0
 #define LOG_TRA_EX(...) (void)0
@@ -77,12 +77,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_DBG(...)                                                                                                                           \
     do                                                                                                                                         \
     {                                                                                                                                          \
-        using autocrypt::logger::_global::spdlog_level;                                                                                        \
-        using autocrypt::logger::_global::logger;                                                                                              \
+        using vp::logger::_global::spdlog_level;                                                                                               \
+        using vp::logger::_global::logger;                                                                                                     \
         if (spdlog_level <= SPDLOG_LEVEL_DEBUG)                                                                                                \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::debug, __VA_ARGS__); \
     } while (0)
-#define LOG_DBG_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::debug, __VA_ARGS__)
+#define LOG_DBG_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::debug, __VA_ARGS__)
 #else
 #define LOG_DBG(...) (void)0
 #define LOG_DBG_EX(...) (void)0
@@ -92,12 +92,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_INF(...)                                                                                                                          \
     do                                                                                                                                        \
     {                                                                                                                                         \
-        using autocrypt::logger::_global::spdlog_level;                                                                                       \
-        using autocrypt::logger::_global::logger;                                                                                             \
+        using vp::logger::_global::spdlog_level;                                                                                              \
+        using vp::logger::_global::logger;                                                                                                    \
         if (spdlog_level <= SPDLOG_LEVEL_INFO)                                                                                                \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::info, __VA_ARGS__); \
     } while (0)
-#define LOG_INF_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::info, __VA_ARGS__)
+#define LOG_INF_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::info, __VA_ARGS__)
 #else
 #define LOG_INF(...) (void)0
 #define LOG_INF_EX(...) (void)0
@@ -107,12 +107,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_WRN(...)                                                                                                                          \
     do                                                                                                                                        \
     {                                                                                                                                         \
-        using autocrypt::logger::_global::spdlog_level;                                                                                       \
-        using autocrypt::logger::_global::logger;                                                                                             \
+        using vp::logger::_global::spdlog_level;                                                                                              \
+        using vp::logger::_global::logger;                                                                                                    \
         if (spdlog_level <= SPDLOG_LEVEL_WARN)                                                                                                \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::warn, __VA_ARGS__); \
     } while (0)
-#define LOG_WRN_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::warn, __VA_ARGS__)
+#define LOG_WRN_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::warn, __VA_ARGS__)
 #else
 #define LOG_WRN(...) (void)0
 #define LOG_WRN_EX(...) (void)0
@@ -122,12 +122,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_ERR(...)                                                                                                                         \
     do                                                                                                                                       \
     {                                                                                                                                        \
-        using autocrypt::logger::_global::spdlog_level;                                                                                      \
-        using autocrypt::logger::_global::logger;                                                                                            \
+        using vp::logger::_global::spdlog_level;                                                                                             \
+        using vp::logger::_global::logger;                                                                                                   \
         if (spdlog_level <= SPDLOG_LEVEL_ERROR)                                                                                              \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::err, __VA_ARGS__); \
     } while (0)
-#define LOG_ERR_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::err, __VA_ARGS__)
+#define LOG_ERR_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::err, __VA_ARGS__)
 #else
 #define LOG_ERR(...) (void)0
 #define LOG_ERR_EX(...) (void)0
@@ -137,12 +137,12 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
 #define LOG_CRI(...)                                                                                                                              \
     do                                                                                                                                            \
     {                                                                                                                                             \
-        using autocrypt::logger::_global::spdlog_level;                                                                                           \
-        using autocrypt::logger::_global::logger;                                                                                                 \
+        using vp::logger::_global::spdlog_level;                                                                                                  \
+        using vp::logger::_global::logger;                                                                                                        \
         if (spdlog_level <= SPDLOG_LEVEL_CRITICAL)                                                                                                \
             (logger)->log(spdlog::source_loc{__FILE__, __LINE__, static_cast<const char *>(__FUNCTION__)}, spdlog::level::critical, __VA_ARGS__); \
     } while (0)
-#define LOG_CRI_EX(file, line, function, ...) (autocrypt::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::critical, __VA_ARGS__)
+#define LOG_CRI_EX(file, line, function, ...) (vp::logger::_global::logger)->log(spdlog::source_loc{file, line, static_cast<const char *>(function)}, spdlog::level::critical, __VA_ARGS__)
 #else
 #define LOG_CRI(...) (void)0
 #define LOG_CRI_EX(...) (void)0

@@ -5,7 +5,7 @@
 #include <sstream>
 
 // Legacy Cache에 대한 벤치마크 코드는 풀 리퀘스트 승인 후 최종 병합 전에 삭제 예정
-namespace autocrypt
+namespace vp
 {
 class GaiaLruCacheFixture : public benchmark::Fixture
 {
@@ -138,4 +138,4 @@ BENCHMARK_DEFINE_F(GaiaLruCacheFixture, get16667Gaia)
 }
 BENCHMARK_REGISTER_F(GaiaLruCacheFixture, get16667Gaia)
     ->UseRealTime();
-} // namespace autocrypt
+} // namespace vp

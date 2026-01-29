@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
-namespace autocrypt
+namespace vp
 {
 
 // 기본 생성자가 제대로 작동하는지 확인하는 테스트
@@ -174,4 +174,4 @@ TEST(LruCache, RemoveNonExistentKey)
     ASSERT_TRUE(lru_cache.get(1).has_value());
     ASSERT_TRUE(lru_cache.get(2).has_value());
 }
-} // namespace autocrypt
+} // namespace vp

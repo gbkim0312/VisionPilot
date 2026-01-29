@@ -5,7 +5,7 @@
 #include <utility> // for pair
 #include <vector>  // for vector
 
-namespace autocrypt
+namespace vp
 {
 
 struct Rectangle
@@ -531,4 +531,4 @@ inline std::string m49ToAlpha3(const uint16_t &m49_code)
     }
 }
 
-} // namespace autocrypt
+} // namespace vp

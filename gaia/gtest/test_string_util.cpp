@@ -1,27 +1,27 @@
 #include "gaia_string_util.hpp"
 #include <gtest/gtest.h>
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(ToUpper, CompareWithLower)
 {
-    ASSERT_EQ(to_upper("autocrypt"), "AUTOCRYPT");
+    ASSERT_EQ(to_upper("vp"), "vp");
 }
 
 TEST(ToLower, CompareWithUpper)
 {
-    ASSERT_EQ(to_lower("AUTOCRYPT"), "autocrypt");
+    ASSERT_EQ(to_lower("vp"), "vp");
 }
 
 TEST(CiEquals, Positive)
 {
-    ASSERT_TRUE(ci_equals("AUTOCRYPT", "autocrypt"));
+    ASSERT_TRUE(ci_equals("vp", "vp"));
 }
 
 TEST(CiEquals, Negative)
 {
-    ASSERT_FALSE(ci_equals("AUTOCRYPT", "AUTOBAHNN"));
+    ASSERT_FALSE(ci_equals("vp", "AUTOBAHNN"));
 }
 
 TEST(Base64, codec)
@@ -77,10 +77,10 @@ TEST(Stricmp, UnequalFirstCharacter)
 
 TEST(Stricmp, UnequalsucceedingCharacter)
 {
-    std::string s1 = "Autocrypt";
+    std::string s1 = "vp";
     std::string s2 = "Autobahnn";
 
     ASSERT_GT(stricmp(s1, s2), 0);
 }
 
-} // namespace autocrypt
+} // namespace vp

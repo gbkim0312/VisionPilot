@@ -1,6 +1,6 @@
 #!/bin/bash
-# build.sh -- builds AutoCrypt SecurityPlatform files
-#   by Jinwoo Lee <jwlee@autocrypt.io>
+# build.sh -- builds vp SecurityPlatform files
+#   by Jinwoo Lee <jwlee@vp.io>
 
 # This script should run inside securityplatform root directory.
 # Default options:

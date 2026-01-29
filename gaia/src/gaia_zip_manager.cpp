@@ -14,7 +14,7 @@ std::pair<uint32_t, std::string> parseLatestZipError(mz_zip_archive &zip)
 }
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 bool ZipManager::loadFromMem(const OctStr &content)
@@ -88,13 +88,13 @@ bool ZipManager::saveToFile(const std::string &zip_filepath)
         mz_zip_writer_end(&zip);
         return false;
     }
-    if(mz_zip_writer_finalize_archive(&zip) == MZ_FALSE)
+    if (mz_zip_writer_finalize_archive(&zip) == MZ_FALSE)
     {
         this->parseLatestZipError(&zip);
         mz_zip_writer_end(&zip);
         return false;
     }
-    if(mz_zip_writer_end(&zip) == MZ_FALSE)
+    if (mz_zip_writer_end(&zip) == MZ_FALSE)
     {
         this->parseLatestZipError(&zip);
         mz_zip_writer_end(&zip);
@@ -286,4 +286,4 @@ bool ZipManager::writeAllFiles(zip_t *zip_ptr)
     return true;
 }
 
-} // namespace autocrypt
+} // namespace vp

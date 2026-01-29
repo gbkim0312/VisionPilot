@@ -24,7 +24,7 @@ uint8_t test_byte10 = 250U;
 std::random_device rd{};
 std::mt19937_64 mt{rd()};
 } // namespace
-namespace autocrypt
+namespace vp
 {
 
 TEST(OctStr, MakeOctStrWithBytes)
@@ -81,8 +81,7 @@ TEST(OctStr, MakeOctStrWithString)
     OctStr test_oct{test_byte1, test_byte2, test_byte3, test_byte4, test_byte5, test_byte6, test_byte7, test_byte8, test_byte9, test_byte10};
 
     const std::array<std::uint8_t, 10> bytes{
-        1, 2, 4, 8, 16, 32, 64, 0x80, 0, 0xFA
-    };
+        1, 2, 4, 8, 16, 32, 64, 0x80, 0, 0xFA};
 
     const auto test_string =
         std::string(reinterpret_cast<const char *>(bytes.data()), bytes.size());
@@ -116,8 +115,7 @@ TEST(OctStr, MakeOctStrWithCharPointerAndSize)
     OctStr test_oct{test_byte1, test_byte2, test_byte3, test_byte4, test_byte5, test_byte6, test_byte7, test_byte8, test_byte9, test_byte10};
 
     const std::array<std::uint8_t, 10> bytes{
-        1, 2, 4, 8, 16, 32, 64, 0x80, 0, 0xFA
-    };
+        1, 2, 4, 8, 16, 32, 64, 0x80, 0, 0xFA};
 
     const auto test_string =
         std::string(reinterpret_cast<const char *>(bytes.data()), bytes.size());
@@ -966,4 +964,4 @@ TEST(OctStrHashTest, UnorderedSetUsage)
     EXPECT_TRUE(set.find(OctStr{0x00, 0x00}) == set.end());
 }
 
-} // namespace autocrypt
+} // namespace vp

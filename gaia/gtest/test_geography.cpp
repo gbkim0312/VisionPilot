@@ -10,7 +10,7 @@ constexpr auto kLatLonScale = 1e7;
 constexpr auto kCountryDbPath = "country21.bin";
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(Geography, RectangularRegion)
@@ -205,4 +205,4 @@ TEST(Geography, CircleInsidePolygon_Inside)
     ASSERT_FALSE(result);
 }
 
-} // namespace autocrypt
+} // namespace vp

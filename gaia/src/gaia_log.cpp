@@ -23,7 +23,7 @@ namespace
 std::string loggerName = "gaialog";
 } // namespace
 
-namespace autocrypt::logger
+namespace vp::logger
 {
 namespace _global
 {
@@ -81,7 +81,7 @@ void logInit(const std::vector<LogConfig> &cnfs, const std::function<spdlog::sin
         }
         else if (log_type == "SYSLOG")
         {
-            sink = std::make_shared<spdlog::sinks::syslog_sink_mt>("autocryptv2x", 0, 0, false);
+            sink = std::make_shared<spdlog::sinks::syslog_sink_mt>("vision__pilot", 0, 0, false);
         }
         else if (log_type == "FILE")
         {
@@ -106,7 +106,7 @@ void logInit(const std::vector<LogConfig> &cnfs, const std::function<spdlog::sin
 #if defined(__ANDROID__)
         else if (log_type == "ANDROID")
         {
-            sink = std::make_shared<spdlog::sinks::android_sink_mt>("autocryptv2x");
+            sink = std::make_shared<spdlog::sinks::android_sink_mt>("vision__pilot");
         }
 #endif
         else
@@ -161,4 +161,4 @@ void logInitFromMain(int argc, char *argv[], const std::function<spdlog::sink_pt
     logInit(std::vector<LogConfig>{conf}, sink_generator_cb);
 }
 
-} // namespace autocrypt::logger
+} // namespace vp::logger

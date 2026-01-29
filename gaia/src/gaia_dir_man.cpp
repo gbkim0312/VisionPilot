@@ -13,7 +13,7 @@
 #include <spdlog/fmt/bundled/format.h> // for format
 #include <sys/stat.h>                  // for stat, lstat, S_ISREG, S_ISDIR
 
-namespace autocrypt
+namespace vp
 {
 
 static bool compName(const std::string &a, const std::string &b)
@@ -69,9 +69,7 @@ int DirMan::_allFiles(std::vector<std::string> &all) // NOLINT
 
     struct dirent *res = nullptr;
     std::string pathname;
-    struct stat statBuf
-    {
-    };
+    struct stat statBuf{};
 
     while ((res = readdir(dirp)) != nullptr)
     {
@@ -104,9 +102,7 @@ int DirMan::_allFilenDirs(std::vector<std::string> &files, std::vector<std::stri
 
     struct dirent *res = nullptr;
     std::string pathname;
-    struct stat statBuf
-    {
-    };
+    struct stat statBuf{};
 
     while ((res = readdir(dirp)) != nullptr)
     {
@@ -311,7 +307,7 @@ bool DirMan::isFileExist(uint16_t iVal)
     std::string pathname;
     buildPath(pathname, iVal);
 
-    return autocrypt::isFileExist(pathname);
+    return vp::isFileExist(pathname);
 }
 
-} // namespace autocrypt
+} // namespace vp

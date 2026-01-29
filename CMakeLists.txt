@@ -62,36 +62,24 @@ if(BUILD_OPEN_CV_FROM_SOURCE)
     FetchContent_MakeAvailable(opencv)
 
     # OpenCV 헤더 경로 설정
-    set(OPENCV_INCLUDE_DIRS
-        ${opencv_BINARY_DIR}/include
-        ${opencv_BINARY_DIR}/modules/core/include
-        ${opencv_BINARY_DIR}/modules/imgcodecs/include
-        ${opencv_SOURCE_DIR}/include
-        ${opencv_SOURCE_DIR}/modules/core/include
-        ${opencv_SOURCE_DIR}/modules/core/include/opencv4
-        ${opencv_SOURCE_DIR}/modules/calib3d/include
-        ${opencv_SOURCE_DIR}/modules/imgproc/include
-        ${opencv_SOURCE_DIR}/modules/imgcodecs/include
-        ${opencv_SOURCE_DIR}/modules/videoio/include
+    if(BUILD_OPEN_CV_FROM_SOURCE)
+        # 하위 모듈들을 위한 인터페이스 경로 전파
+        set(_OPENCV_MODULES calib3d core imgproc videoio dnn imgcodecs objdetect highgui features2d flann ml photo stitching video)
 
-        ${opencv_SOURCE_DIR}/modules/highgui/include
-        ${opencv_SOURCE_DIR}/modules/features2d/include
-        ${opencv_SOURCE_DIR}/modules/objdetect/include
-        ${opencv_SOURCE_DIR}/modules/dnn/include
-
-        # ${opencv_SOURCE_DIR}/modules/ml/include
-        # ${opencv_SOURCE_DIR}/modules/photo/include
-        # ${opencv_SOURCE_DIR}/modules/stitching/include
-        ${opencv_SOURCE_DIR}/modules/flann/include
-
-        # ${opencv_SOURCE_DIR}/modules/gapi/include
-        ${opencv_SOURCE_DIR}/modules/video/include
-        ${CMAKE_BINARY_DIR} # opencv_modules.hpp 경로 추가
-    )
-
-    file(GLOB OpenCV_LIBS "${opencv_BINARY_DIR}/lib/*.so")
+        foreach(_mod ${_OPENCV_MODULES})
+            if(TARGET opencv_${_mod})
+                target_include_directories(opencv_${_mod} INTERFACE
+                "$<BUILD_INTERFACE:${opencv_BINARY_DIR}>"
+                "$<BUILD_INTERFACE:${opencv_SOURCE_DIR}/include>"
+                "$<BUILD_INTERFACE:${opencv_SOURCE_DIR}/modules/${_mod}/include>"
+                "$<BUILD_INTERFACE:${opencv_BINARY_DIR}/modules/${_mod}/include>"
+                "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
+                )
+            endif()
+        endforeach()
+    endif()
 else()
-    find_package(OpenCV REQUIRED COMPONENTS core imgproc videoio dnn imgcodecs)
+    find_package(OpenCV REQUIRED COMPONENTS calib3d core imgproc videoio dnn imgcodecs)
 endif()
 
 # 의존성 가져오기
@@ -123,7 +111,38 @@ if(NOT googlebenchmark_POPULATED)
 endif()
 
 add_subdirectory(gaia)
+add_subdirectory(config)
+add_subdirectory(infrastructure)
 add_subdirectory(adapter)
 add_subdirectory(application)
 add_subdirectory(assembly)
 
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE
+    vp::assembly
+    vp::config
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/assembly/include
+)
+
+set(default_build_type "Debug")
+
+install(TARGETS gtest gmock spdlog
+  LIBRARY
+  DESTINATION lib
+  COMPONENT vp_libraries)
+
+install(FILES res/etc/sample.mp4
+  DESTINATION etc
+  COMPONENT vp_samples
+)
+
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME
+  DESTINATION bin
+  COMPONENT vp_executables
+)

@@ -2,7 +2,7 @@
 
 #include <utility> // for forward
 
-namespace autocrypt
+namespace vp
 {
 
 class ScopeGuardBase
@@ -50,4 +50,4 @@ ScopeGuard<Func> MakeGuard(Func &&func)
     return ScopeGuard<Func>(std::forward<Func>(func));
 }
 
-} // namespace autocrypt
+} // namespace vp

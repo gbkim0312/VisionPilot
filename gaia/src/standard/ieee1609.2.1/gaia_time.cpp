@@ -5,7 +5,7 @@ namespace
 constexpr uint32_t i0sec = 347619603;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 uint32_t iValueToTime32(uint16_t i_value)
 {
@@ -27,4 +27,4 @@ uint16_t time32ToIvalue(uint32_t time32)
     return time32;
 }
 
-} // namespace autocrypt
+} // namespace vp

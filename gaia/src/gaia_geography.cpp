@@ -43,9 +43,9 @@ std::once_flag _db_once;
 inline void dbInit(const std::string &country_db_path)
 {
 
-    if (!autocrypt::isFileExist(country_db_path))
+    if (!vp::isFileExist(country_db_path))
     {
-        THROWLOG(autocrypt::SysException,
+        THROWLOG(vp::SysException,
                  "dbInit: database file not found: {}", country_db_path);
     }
 
@@ -54,7 +54,7 @@ inline void dbInit(const std::string &country_db_path)
         _country_db.reset(ZDOpenDatabase(country_db_path.c_str()));
         if (!_country_db)
         {
-            THROWLOG(autocrypt::SysException, "getCountryCodeFromLatLon: incorrect database path: {}", country_db_path);
+            THROWLOG(vp::SysException, "getCountryCodeFromLatLon: incorrect database path: {}", country_db_path);
         } });
 }
 
@@ -250,7 +250,7 @@ std::pair<bool, uint8_t> lineSegmentIntersection(int64_t segment_previous_start_
 bool lineInPolygon(const std::vector<std::pair<int32_t, int32_t>> &locations, int32_t start_longitude, int32_t start_latitude, int32_t end_longitude, int32_t end_latitude)
 { // 한 선분이 다각형 안에 완전히 포함되는지 여부 반환
 
-    if (!autocrypt::insidePolygonIndicator(locations, start_latitude, start_longitude) || !autocrypt::insidePolygonIndicator(locations, end_latitude, end_longitude))
+    if (!vp::insidePolygonIndicator(locations, start_latitude, start_longitude) || !vp::insidePolygonIndicator(locations, end_latitude, end_longitude))
     {
         return false;
     }
@@ -466,7 +466,7 @@ bool circleInsideCountryPreciseCheck(uint32_t polygon_id, double center_lat_deg,
 }
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 std::string getCountryCodeFromLatLon(float latitude,
@@ -616,7 +616,7 @@ bool circleInsidePolygon(const std::vector<std::pair<int32_t, int32_t>> &locatio
     }
 
     // 1) 중심이 폴리곤 내부인지 확인
-    if (!autocrypt::insidePolygonIndicator(locations, center_lat, center_lon))
+    if (!vp::insidePolygonIndicator(locations, center_lat, center_lon))
     {
         return false;
     }
@@ -707,4 +707,4 @@ bool circleInsideCountryAt(int32_t center_lat,
     return ::circleInsideCountryPreciseCheck(polygon_id, center_lat_deg, center_lon_deg, radius_m);
 }
 
-} // namespace autocrypt
+} // namespace vp

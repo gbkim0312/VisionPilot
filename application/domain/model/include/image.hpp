@@ -1,6 +1,6 @@
+#pragma once
 #include <cstdint>
 #include <vector>
-
 namespace vp::domain::model
 {
 struct ImagePacket

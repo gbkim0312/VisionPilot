@@ -10,7 +10,7 @@
 #include <iostream> // for size_t, ostream
 #include <string>   // for basic_string, string, hash
 
-namespace autocrypt
+namespace vp
 {
 
 using Bytes = std::basic_string<uint8_t>;
@@ -421,17 +421,17 @@ inline OctStr operator"" _hex(const char *c, size_t size)
 }
 } // namespace literals
 
-} // namespace autocrypt
+} // namespace vp
 
 namespace std
 {
-// std::hash specialization for autocrypt::OctStr
-// This allows autocrypt::OctStr to be used as a key in unordered_map, unordered_set, etc.
+// std::hash specialization for vp::OctStr
+// This allows vp::OctStr to be used as a key in unordered_map, unordered_set, etc.
 // The hash function is designed to be efficient and to minimize collisions.
 template <>
-struct hash<autocrypt::OctStr>
+struct hash<vp::OctStr>
 {
-    size_t operator()(autocrypt::OctStr const &s) const noexcept
+    size_t operator()(vp::OctStr const &s) const noexcept
     {
         size_t h = 146527U; // Magic prime number
         for (auto byte : s.bytes())
@@ -447,7 +447,7 @@ struct hash<autocrypt::OctStr>
 namespace fmt
 {
 template <>
-struct formatter<autocrypt::OctStr>
+struct formatter<vp::OctStr>
 {
     constexpr auto parse(format_parse_context &ctx) const -> decltype(ctx.begin())
     {
@@ -455,7 +455,7 @@ struct formatter<autocrypt::OctStr>
     }
 
     template <typename FormatContext>
-    auto format(const autocrypt::OctStr &value, FormatContext &ctx) -> decltype(ctx.out())
+    auto format(const vp::OctStr &value, FormatContext &ctx) -> decltype(ctx.out())
     {
         return format_to(ctx.out(), value.hexlify());
     }

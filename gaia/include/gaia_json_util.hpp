@@ -11,7 +11,7 @@
 #include <vector>            // for vector
 
 using json = nlohmann::json;
-namespace autocrypt
+namespace vp
 {
 
 template <class T>
@@ -79,4 +79,4 @@ json stringToJson(const std::string &jsonStr);
 
 json fileToJson(const std::string &file_name);
 
-} // namespace autocrypt
+} // namespace vp

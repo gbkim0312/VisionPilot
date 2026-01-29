@@ -1,6 +1,6 @@
 #include "gaia_octstr.hpp"
 
-namespace autocrypt
+namespace vp
 {
 
 // 모든 생성자가(비어있는 것을 만드는 생성자 합쳐서) 짧은 OctStr에 대한 최적화를 해 주어야 한다.
@@ -423,4 +423,4 @@ std::string OctStr::hexlify() const
     return hex;
 }
 
-} // namespace autocrypt
+} // namespace vp

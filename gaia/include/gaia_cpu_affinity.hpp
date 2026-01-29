@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <thread>
 
-namespace autocrypt
+namespace vp
 {
 
 struct Affinity
@@ -41,4 +41,4 @@ inline bool setCpuAffinity(std::thread &thread, Affinity affinity)
 #endif
 }
 
-} // namespace autocrypt
+} // namespace vp

@@ -21,7 +21,7 @@ class DB;
 #define KEY_DB_NOT_FOUND 1
 #define KEY_DB_FOUND 0
 
-namespace autocrypt
+namespace vp
 {
 
 class KeyDB
@@ -72,4 +72,4 @@ private:
     std::unique_ptr<leveldb::DB> db_ptr_;
 };
 
-} // namespace autocrypt
+} // namespace vp

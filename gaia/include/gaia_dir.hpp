@@ -5,7 +5,7 @@
 #include <string>  // for string, allocator, operator+, char_traits
 #include <vector>  // for vector
 
-namespace autocrypt
+namespace vp
 {
 
 template <typename Arg1, typename Arg2>
@@ -45,4 +45,4 @@ void removeFile(const std::string &pathname);
 
 bool fileNameExt(const std::string &fileName, std::string &name, std::string &ext);
 
-} // namespace autocrypt
+} // namespace vp

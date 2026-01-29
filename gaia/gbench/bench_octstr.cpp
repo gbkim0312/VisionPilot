@@ -19,19 +19,19 @@ public:
 
 namespace
 {
-autocrypt::Bytes::value_type test_oct1 = 1;
-autocrypt::Bytes::value_type test_oct2 = 2;
-autocrypt::Bytes::value_type test_oct3 = 4;
-autocrypt::Bytes::value_type test_oct4 = 8;
-autocrypt::Bytes::value_type test_oct5 = 16;
-autocrypt::Bytes::value_type test_oct6 = 32;
-autocrypt::Bytes::value_type test_oct7 = 64;
-autocrypt::Bytes::value_type test_oct8 = 128;
-autocrypt::Bytes::value_type test_oct9 = 151;
-autocrypt::Bytes::value_type test_oct10 = 250;
+vp::Bytes::value_type test_oct1 = 1;
+vp::Bytes::value_type test_oct2 = 2;
+vp::Bytes::value_type test_oct3 = 4;
+vp::Bytes::value_type test_oct4 = 8;
+vp::Bytes::value_type test_oct5 = 16;
+vp::Bytes::value_type test_oct6 = 32;
+vp::Bytes::value_type test_oct7 = 64;
+vp::Bytes::value_type test_oct8 = 128;
+vp::Bytes::value_type test_oct9 = 151;
+vp::Bytes::value_type test_oct10 = 250;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 BENCHMARK_DEFINE_F(Byte, MakeLongOctStrWithUint8PointerAndSize)
@@ -812,4 +812,4 @@ BENCHMARK_DEFINE_F(Byte, Compare)
 BENCHMARK_REGISTER_F(Byte, Compare)
     ->UseRealTime();
 
-} // namespace autocrypt
+} // namespace vp

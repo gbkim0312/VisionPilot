@@ -6,7 +6,7 @@
 #include <string>          // for string
 #include <vector>          // for vector
 
-namespace autocrypt
+namespace vp
 {
 
 class DirMan
@@ -65,4 +65,4 @@ private:
     int _allFilenDirs(std::vector<std::string> &files, std::vector<std::string> &dirs);
 };
 
-} // namespace autocrypt
+} // namespace vp

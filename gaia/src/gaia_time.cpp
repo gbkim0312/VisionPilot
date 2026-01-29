@@ -54,7 +54,7 @@ int epoch_time_base_gap = 0;
 
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 #ifndef WIN32
@@ -180,4 +180,4 @@ uint64_t time32ToTime64(uint32_t time32)
     return (static_cast<uint64_t>(time32)) * 1000000;
 }
 
-} // namespace autocrypt
+} // namespace vp

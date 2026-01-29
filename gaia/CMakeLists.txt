@@ -1,5 +1,5 @@
 ﻿MESSAGE(STATUS "==========================================")
-MESSAGE(STATUS "AutoCrypt GAIA Package")
+MESSAGE(STATUS "vp GAIA Package")
 MESSAGE(STATUS "==========================================")
 
 cmake_minimum_required(VERSION 3.22)

@@ -2,7 +2,7 @@
 #include "nlohmann/json.hpp" // for basic_json<>::object_t
 #include <iostream>          // for cerr
 
-namespace autocrypt
+namespace vp
 {
 
 std::string jsonFileToStr(const std::string &file_name)
@@ -60,4 +60,4 @@ json fileToJson(const std::string &file_name)
     }
 }
 
-} // namespace autocrypt
+} // namespace vp

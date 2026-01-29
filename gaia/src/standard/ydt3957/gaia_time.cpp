@@ -6,7 +6,7 @@ namespace
 constexpr uint32_t chinaI0sec = 505425600;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 uint32_t iValueToTime32(uint16_t i_value)
 {
@@ -28,4 +28,4 @@ uint16_t time32ToIvalue(uint32_t time32)
     time32 /= 604800; // 1week : 60 * 60 * 24 * 7
     return time32;
 }
-} // namespace autocrypt
+} // namespace vp

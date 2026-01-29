@@ -10,7 +10,7 @@ DEFINE_ENUM_CLASS(
     TEST_3);
 }
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(MacroTest, DefineEnumClass)
@@ -31,4 +31,4 @@ TEST(MacroTest, DefineEnumClass)
     ASSERT_EQ(toString(test_enum_3), test_enum_3_str);
 }
 
-} // namespace autocrypt
+} // namespace vp

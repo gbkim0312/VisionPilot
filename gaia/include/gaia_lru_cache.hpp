@@ -7,7 +7,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace autocrypt
+namespace vp
 {
 
 template <typename Key, typename Value, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>
@@ -127,4 +127,4 @@ private:
     std::mutex mutex_;
 };
 
-} // namespace autocrypt
+} // namespace vp

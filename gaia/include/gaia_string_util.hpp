@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace autocrypt
+namespace vp
 {
 
 std::string to_upper(std::string str);
@@ -43,4 +43,4 @@ std::string rtrim(const std::string &str, const std::string &trimming_str = {});
 std::string trim(const std::string &str, const std::string &trimming_str = {});
 std::vector<std::string> split(const std::string &str, const std::string &delimiter);
 
-} // namespace autocrypt
+} // namespace vp

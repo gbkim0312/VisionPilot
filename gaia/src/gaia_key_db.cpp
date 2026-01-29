@@ -19,7 +19,7 @@ namespace
 std::string kDbPrefix = "cf:";
 }
 
-namespace autocrypt
+namespace vp
 {
 
 std::shared_ptr<KeyDB> KeyDB::inst(const std::string &db_path)
@@ -366,4 +366,4 @@ bool KeyDB::containsKey(uint32_t keyid)
     return true;
 }
 
-} // namespace autocrypt
+} // namespace vp

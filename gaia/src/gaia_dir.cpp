@@ -12,7 +12,7 @@
 #include <sys/stat.h>           // for stat, mkdir, S_ISREG, S_IRWXU, S_ISDIR
 #include <unistd.h>             // for rmdir
 
-namespace autocrypt
+namespace vp
 {
 
 enum
@@ -45,9 +45,7 @@ static size_t _readDir(const std::string &dirPath, const std::string &prefix, st
             continue;
         }
 
-        struct stat statBuf
-        {
-        };
+        struct stat statBuf{};
         std::string pathname = joinDir(dirPath.c_str(), ent->d_name);
         if (stat(pathname.c_str(), &statBuf) < 0)
         {
@@ -93,9 +91,7 @@ size_t readDirDirs(const std::string &dirPath, std::vector<std::string> &list, b
 
 bool isDirExist(const std::string &dirName)
 {
-    struct stat statBuf
-    {
-    };
+    struct stat statBuf{};
     if (stat(dirName.c_str(), &statBuf) == -1)
     {
         return false;
@@ -111,9 +107,7 @@ bool isDirExist(const std::string &dirName)
 
 bool isFileExist(const std::string &fileName)
 {
-    struct stat statBuf
-    {
-    };
+    struct stat statBuf{};
     if (stat(fileName.c_str(), &statBuf) == -1)
     {
         return false;
@@ -129,9 +123,7 @@ bool isFileExist(const std::string &fileName)
 
 bool isFileExist(const std::string &fileName, size_t &filesize)
 {
-    struct stat statBuf
-    {
-    };
+    struct stat statBuf{};
     if (stat(fileName.c_str(), &statBuf) == -1)
     {
         return false;
@@ -384,4 +376,4 @@ bool fileNameExt(const std::string &fileName, std::string &name, std::string &ex
     return true;
 }
 
-} // namespace autocrypt
+} // namespace vp

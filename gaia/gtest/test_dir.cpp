@@ -4,7 +4,7 @@
 
 #define DIR_SLASH "/"
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(dirUtil, isDirExist)
@@ -90,4 +90,4 @@ TEST(dirUtil, joinDir)
     EXPECT_EQ(res, "a///d");
 }
 
-} // namespace autocrypt
+} // namespace vp

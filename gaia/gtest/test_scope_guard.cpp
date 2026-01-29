@@ -7,7 +7,7 @@ bool finalized = false;
 bool rollback_triggered = false;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 TEST(ScopeGuardTest, LifeCycleCheck)
@@ -50,4 +50,4 @@ TEST(ScopeGuardTest, LifeCycleCheck)
     ASSERT_TRUE(rollback_triggered);
 }
 
-} // namespace autocrypt
+} // namespace vp

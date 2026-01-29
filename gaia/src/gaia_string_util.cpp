@@ -15,7 +15,7 @@ constexpr auto kPadChar = '=';
 constexpr auto kWhitespace = " \n\r\t\f\v";
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 
 static const std::array<char, 64> BASE64STR = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -24,13 +24,15 @@ static const std::array<char, 64> BASE64STR = {'A', 'B', 'C', 'D', 'E', 'F', 'G'
 
 std::string to_upper(std::string str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c)
+                   { return std::toupper(c); });
     return str;
 }
 
 std::string to_lower(std::string str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c)
+                   { return std::tolower(c); });
     return str;
 }
 
@@ -204,4 +206,4 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
     return splitted_strings;
 }
 
-} // namespace autocrypt
+} // namespace vp

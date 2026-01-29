@@ -14,16 +14,16 @@ constexpr auto kFilename1 = "file_one";
 constexpr auto kFilename2 = "file_another";
 constexpr auto kDirpath1 = "temp/";
 constexpr auto kDirpath2 = "temp/with/subdir/";
-autocrypt::OctStr kFileData1 = std::string{"hi"};
-autocrypt::OctStr kFileData2 = std::string{"ok.."};
+vp::OctStr kFileData1 = std::string{"hi"};
+vp::OctStr kFileData2 = std::string{"ok.."};
 
 void resetDir(const std::string &dir_path)
 {
     try
     {
-        if (autocrypt::isDirExist(dir_path))
+        if (vp::isDirExist(dir_path))
         {
-            autocrypt::removeDir(dir_path);
+            vp::removeDir(dir_path);
         }
     }
     catch (...)
@@ -33,7 +33,7 @@ void resetDir(const std::string &dir_path)
 }
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 class TestZip : public testing::Test
 {
@@ -136,4 +136,4 @@ TEST_F(TestZip, DirectoryHierarchyWithMemory)
     ASSERT_EQ(zip.getAllFileNames().size(), 5);
     ASSERT_EQ(zip.getDirectories().size(), 2);
 }
-} // namespace autocrypt
+} // namespace vp

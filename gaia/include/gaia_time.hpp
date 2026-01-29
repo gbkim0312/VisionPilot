@@ -4,7 +4,7 @@
 #include <string>      // for string
 #include <sys/types.h> // for time_t
 
-namespace autocrypt
+namespace vp
 {
 constexpr auto kDefaultTimeFormat = "%Y-%m-%dT%H:%M:%SZ";
 
@@ -35,4 +35,4 @@ uint64_t time32ToTime64(uint32_t time32);
 uint32_t iValueToTime32(uint16_t i_value);
 uint16_t time32ToIvalue(uint32_t time32);
 
-} // namespace autocrypt
+} // namespace vp

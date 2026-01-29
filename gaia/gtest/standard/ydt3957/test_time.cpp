@@ -7,7 +7,7 @@ constexpr auto kIValue241Time = 651396841;
 constexpr auto ivalue = 241;
 } // namespace
 
-namespace autocrypt
+namespace vp
 {
 TEST(Time, IValue)
 {
@@ -15,4 +15,4 @@ TEST(Time, IValue)
     ASSERT_EQ(ivalue, time32ToIvalue(kIValue241Time));
 }
 
-} // namespace autocrypt
+} // namespace vp
