@@ -1,7 +1,11 @@
 #include "video_loader_impl.hpp"
+#include "gaia_dir.hpp"
 #include "gaia_log.hpp"
+#include "gaia_string_util.hpp"
 #include "gaia_time.hpp"
+#include <exception>
 #include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
 
 namespace vp::adapter::in::frame_loader
@@ -32,11 +36,13 @@ bool VideoLoaderImpl::start()
 
     if (config_.fps > 0)
     {
+        LOG_INF("Setting FPS to {}", config_.fps);
         video_capture_->set(cv::CAP_PROP_FPS, config_.fps);
     }
 
     if (config_.frameSize.width > 0 && config_.frameSize.height > 0)
     {
+        LOG_INF("Setting frame size to {}x{}", config_.frameSize.width, config_.frameSize.height);
         video_capture_->set(cv::CAP_PROP_FRAME_WIDTH, config_.frameSize.width);
         video_capture_->set(cv::CAP_PROP_FRAME_HEIGHT, config_.frameSize.height);
     }
@@ -63,18 +69,52 @@ void VideoLoaderImpl::loadFrames()
     LOG_INF("Frame loading started.");
 
     cv::Mat frame;
+    auto sleep_ms = 10;
+    if (config_.sourceType == config::SourceType::VIDEO_FILE ||
+        config_.sourceType == config::SourceType::FRAME_SET)
+    {
+        sleep_ms = config_.fps > 0 ? static_cast<int>(1000 / config_.fps) : 30;
+    }
+
+    switch (config_.sourceType)
+    {
+    case config::SourceType::VIDEO_FILE:
+        this->loadFramesFromVideoFile();
+        break;
+    case config::SourceType::CAMERA_DEVICE:
+        this->loadFramesFromCameraDevice();
+        break;
+    case config::SourceType::RTSP_STREAM:
+        this->loadFramesFromRtspStream();
+        break;
+    case config::SourceType::FRAME_SET:
+        this->loadFramesFromFrameSet();
+        break;
+    default:
+        LOG_ERR("Unsupported source type.");
+        break;
+    }
+
+    LOG_INF("Frame loading stopped.");
+}
+
+void VideoLoaderImpl::loadFramesFromVideoFile()
+{
+    LOG_TRA("");
+
+    cv::Mat frame;
+    auto sleep_ms = config_.fps > 0 ? static_cast<int>(1000 / config_.fps) : 30;
+
     while (running_)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
         if (!video_capture_->read(frame))
         {
             continue;
         }
 
         // 1. 데이터 패킷 생성
-        auto frame_packet = std::make_shared<domain::model::ImagePacket>();
-        frame_packet->width = frame.cols;
-        frame_packet->height = frame.rows;
-        frame_packet->data.assign(frame.data, frame.data + (frame.total() * frame.elemSize()));
+        auto frame_packet = this->createImagePacketFromMat(frame);
 
         // 2. 이벤트를 생성하여 큐에 Push (std::variant 사용)
         domain::model::Event evt;
@@ -85,8 +125,139 @@ void VideoLoaderImpl::loadFrames()
 
         event_queue_.push(std::move(evt));
     }
+}
 
-    LOG_INF("Frame loading stopped.");
+void VideoLoaderImpl::loadFramesFromCameraDevice()
+{
+    LOG_TRA("");
+
+    cv::Mat frame;
+
+    while (running_)
+    {
+        if (!video_capture_->read(frame))
+        {
+            continue;
+        }
+
+        auto frame_packet = this->createImagePacketFromMat(frame);
+
+        domain::model::Event evt;
+        evt.type = domain::model::EventType::IMAGE;
+        evt.timestamp = vp::getTime64();
+        evt.source = "VideoLoader";
+        evt.data = frame_packet;
+
+        event_queue_.push(std::move(evt));
+    }
+}
+
+void VideoLoaderImpl::loadFramesFromRtspStream()
+{
+    LOG_TRA("");
+
+    cv::Mat frame;
+
+    while (running_)
+    {
+        if (!video_capture_->read(frame))
+        {
+            continue;
+        }
+
+        auto frame_packet = this->createImagePacketFromMat(frame);
+
+        domain::model::Event evt;
+        evt.type = domain::model::EventType::IMAGE;
+        evt.timestamp = vp::getTime64();
+        evt.source = "VideoLoader";
+        evt.data = frame_packet;
+
+        event_queue_.push(std::move(evt));
+    }
+}
+
+void VideoLoaderImpl::loadFramesFromFrameSet()
+{
+    LOG_TRA("");
+
+    cv::Mat frame;
+    auto sleep_ms = config_.fps > 0 ? static_cast<int>(1000 / config_.fps) : 30;
+    std::vector<cv::Mat> buffer_frames = this->loadFramesFromDirectory();
+
+    for (const auto &frm : buffer_frames)
+    {
+        if (!running_)
+        {
+            break;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
+
+        auto frame_packet = this->createImagePacketFromMat(frm);
+
+        domain::model::Event evt;
+        evt.type = domain::model::EventType::IMAGE;
+        evt.timestamp = vp::getTime64();
+        evt.source = "VideoLoader";
+        evt.data = frame_packet;
+
+        event_queue_.push(std::move(evt));
+    }
+}
+
+std::vector<cv::Mat> VideoLoaderImpl::loadFramesFromDirectory()
+{
+    LOG_TRA("Loading frames from directory: {}", config_.source);
+    std::vector<cv::Mat> frames;
+
+    std::vector<std::string> all_files;
+    try
+    {
+        vp::readDirFiles(config_.source, all_files, true);
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERR("Failed to read directory: {}. Error: {}", config_.source, e.what());
+        return frames;
+    }
+
+    for (const auto &filename : all_files)
+    {
+        std::string name;
+        std::string ext;
+
+        vp::fileNameExt(filename, name, ext);
+
+        // TODO: 추후 .jpg, .bmp 등 다양한 데이터셋 형식 지원 필요 시 extension 체크 로직 확장
+        if (vp::stricmp(ext, "png") == 0)
+        {
+            std::string full_path = vp::joinDir(config_.source, filename);
+
+            cv::Mat img = cv::imread(full_path, cv::IMREAD_COLOR);
+            if (img.empty())
+            {
+                LOG_WRN("Failed to load image: {}", full_path);
+                continue;
+            }
+            frames.push_back(img);
+        }
+    }
+
+    LOG_INF("Successfully loaded {} PNG frames from {}", frames.size(), config_.source);
+    return frames;
+}
+
+std::shared_ptr<domain::model::ImagePacket> VideoLoaderImpl::createImagePacketFromMat(const cv::Mat &frame)
+{
+    auto frame_packet = std::make_shared<domain::model::ImagePacket>();
+    frame_packet->width = frame.cols;
+    frame_packet->height = frame.rows;
+    frame_packet->channels = frame.channels();
+    frame_packet->timestamp = vp::getTime64();
+
+    frame_packet->data.assign(frame.data, frame.data + (frame.total() * frame.elemSize()));
+    return frame_packet;
 }
 
 } // namespace vp::adapter::in::frame_loader

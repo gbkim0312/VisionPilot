@@ -22,6 +22,15 @@ public:
 private:
     void loadFrames();
 
+    void loadFramesFromVideoFile();
+    void loadFramesFromCameraDevice();
+    void loadFramesFromRtspStream();
+    void loadFramesFromFrameSet();
+
+    std::vector<cv::Mat> loadFramesFromDirectory();
+
+    std::shared_ptr<domain::model::ImagePacket> createImagePacketFromMat(const cv::Mat &frame);
+
     const config::VideoLoaderConfig &config_;
     std::atomic_bool running_ = false;
     std::thread worker_thread_;

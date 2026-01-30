@@ -33,7 +33,7 @@ file(GLOB DEPS CONFIGURE_DEPENDS "gtest/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
 
 set(_INCLUDE_PRIVATE ${_INCLUDE_PRIVATE} gtest)
-set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock)
+set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgui)
 
 add_executable(${PROJECT_NAME}_test ${ALL_DEPS})
 target_include_directories(

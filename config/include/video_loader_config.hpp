@@ -9,6 +9,7 @@ namespace vp::config
 enum class SourceType
 {
     VIDEO_FILE,
+    FRAME_SET,
     CAMERA_DEVICE,
     RTSP_STREAM
 };
