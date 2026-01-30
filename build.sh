@@ -1,58 +1,59 @@
 #!/bin/zsh
+set -e
 
-# sudo apt install -y build-essential cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev ffmpeg libavcodec-dev libavformat-dev libswscale-dev libxvidcore-dev libx264-dev libxine2-dev libv4l-dev v4l-utils libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk-3-dev mesa-utils libgl1-mesa-dri libgtkglext1-dev libatlas-base-dev gfortran libeigen3-dev python3 python3-dev python3-numpy
+ROOT_DIR=$(readlink -f .)
+COMMON_BUILD_DIR="$ROOT_DIR/build"
+CORES=$(nproc)
 
-# sudo apt install libprotobuf-dev protobuf-compiler
+BUILD_TYPE=${1:-debug}
+BUILD_TYPE_LOWER=$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')
+CMAKE_BUILD_TYPE="${(C)BUILD_TYPE_LOWER}"
+INSTALL_DIR="$COMMON_BUILD_DIR/$BUILD_TYPE_LOWER/install"
 
-# sudo apt-get install -y libopenjp2-7-dev pkg-config
-# sudo apt install curl libcurl4-openssl-dev
-# 사용법 출력
-function usage() {
-    echo "Usage: $0 [build_type]"
-    echo "  build_type: debug | release"
-    exit 1
-}
 
-# 빌드 타입 인자 확인
-if [ $# -ne 1 ]; then
-    usage
-fi
+echo "🚀 [Master] Starting Unified Monorepo Build ($CMAKE_BUILD_TYPE)"
+mkdir -p "$INSTALL_DIR"
 
-BUILD_TYPE=$1
-BUILD_TYPE=$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')
+# --- STEP 1: OpenCV 4.9.0 ---
+echo "📦 [1/4] Building OpenCV..."
+OPENCV_BUILD_DIR="$COMMON_BUILD_DIR/$BUILD_TYPE_LOWER/opencv"
+mkdir -p "$OPENCV_BUILD_DIR"
+cmake -S "$ROOT_DIR/opencv" -B "$OPENCV_BUILD_DIR" -G Ninja \
+    -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+    -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+    -DBUILD_LIST=core,imgproc,videoio,dnn,imgcodecs,objdetect,highgui,calib3d,features2d,flann \
+    -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_SHARED_LIBS=ON
+cmake --build "$OPENCV_BUILD_DIR" -j$CORES
+cmake --install "$OPENCV_BUILD_DIR"
 
-if [[ "$BUILD_TYPE" == "debug" ]]; then
-    CMAKE_BUILD_TYPE="Debug"
-elif [[ "$BUILD_TYPE" == "release" ]]; then
-    CMAKE_BUILD_TYPE="Release"
-else
-    usage
-fi
+# --- STEP 2: g2o (외부 클론본) ---
+echo "📦 [2/4] Building g2o -> $INSTALL_DIR"
+G2O_BUILD_DIR="$COMMON_BUILD_DIR/$BUILD_TYPE_LOWER/g2o"
+mkdir -p "$G2O_BUILD_DIR"
+cmake -S "$ROOT_DIR/g2o" -B "$G2O_BUILD_DIR" -G Ninja \
+    -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+    -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_UNITTESTS=OFF -DG2O_USE_CHOLMOD=OFF -DG2O_USE_CSPARSE=ON -DG2O_USE_OPENGL=OFF
+cmake --build "$G2O_BUILD_DIR" -j$CORES
+cmake --install "$G2O_BUILD_DIR"
 
-BUILD_DIR="build/${CMAKE_BUILD_TYPE}"
-INSTALL_DIR="${BUILD_DIR}/test"
+# --- STEP 3: Stella-VSLAM ---
+echo "📦 [3/4] Building Stella-VSLAM..."
+# FBoW 빌드를 위해 3rd/FBoW 경로가 포함되어야 할 수 있음
+STELLA_BUILD_DIR="$COMMON_BUILD_DIR/$BUILD_TYPE_LOWER/stella_vslam"
+mkdir -p "$STELLA_BUILD_DIR"
+cmake -S "$ROOT_DIR/stella_vslam" -B "$STELLA_BUILD_DIR" -G Ninja \
+    -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+    -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+    -DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+    -DBUILD_SHARED_LIBS=ON
+cmake --build "$STELLA_BUILD_DIR" -j$CORES
+cmake --install "$STELLA_BUILD_DIR"
 
-# 빌드 디렉토리 생성
-mkdir -p "${BUILD_DIR}"
+# --- STEP 4: VisionPilot ---
+echo "📦 [4/4] Building VisionPilot..."
+cd "$ROOT_DIR/vision_pilot"
+./build.sh "$BUILD_TYPE_LOWER"
 
-# CMake 설정 (compile_commands.json 생성)
-cmake -S . -B "${BUILD_DIR}" -G Ninja \
-      -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
-      -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-      -DBUILD_opencv_highgui=ON \
-      -DBUILD_opencv_videoio=ON \
-      -DCMAKE_PREFIX_PATH="${PWD}/${BUILD_DIR}/_deps/opencv-build"
-
-# 빌드
-cmake --build "${BUILD_DIR}" --config "${CMAKE_BUILD_TYPE}"
-
-# 설치
-cmake --install "${BUILD_DIR}"
-
-# compile_commands.json을 프로젝트 루트에 심볼릭 링크(이미 있으면 갱신)
-ln -sf "${BUILD_DIR}/compile_commands.json" "./compile_commands.json"
-
-echo "Build finished: ${CMAKE_BUILD_TYPE} mode"
-echo "  - install: ${INSTALL_DIR}/"
-echo "  - compile_commands.json -> ${BUILD_DIR}/compile_commands.json (symlink)"
+echo "✨ [Master] All builds completed successfully!"
