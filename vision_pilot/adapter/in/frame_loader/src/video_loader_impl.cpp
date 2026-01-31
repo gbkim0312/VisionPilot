@@ -11,15 +11,23 @@
 namespace
 {
 
-std::shared_ptr<vp::domain::model::ImagePacket> createImagePacketFromMat(const cv::Mat &frame)
+std::shared_ptr<vp::domain::model::ImagePacket> createImagePacketFromMat(const cv::Mat &frame, uint64_t frame_id)
 {
     auto frame_packet = std::make_shared<vp::domain::model::ImagePacket>();
-    frame_packet->width = frame.cols;
-    frame_packet->height = frame.rows;
-    frame_packet->channels = frame.channels();
-    frame_packet->timestamp = vp::getTime64();
 
-    frame_packet->data.assign(frame.data, frame.data + (frame.total() * frame.elemSize())); // NOLINT: OPENCV
+    auto &mono_packet = frame_packet->payload.emplace<vp::domain::model::MonoImagePacket>();
+
+    mono_packet.frame.width = frame.cols;
+    mono_packet.frame.height = frame.rows;
+    mono_packet.frame.channels = frame.channels();
+    mono_packet.frame.step = static_cast<int>(frame.step);
+    mono_packet.frame.data.assign(frame.data, frame.data + (frame.total() * frame.elemSize())); // NOLINT: OPENCV
+
+    frame_packet->timestamp = vp::getTime64();
+    frame_packet->encoding = (frame.channels() == 1) ? vp::domain::model::ImageEncoding::MONO8 : vp::domain::model::ImageEncoding::BGR8; // TODO: 추후 RGB8 등도 지원
+    frame_packet->format = vp::domain::model::ImageFormat::MONO;
+    frame_packet->frame_id = frame_id;
+
     return frame_packet;
 }
 } // namespace
@@ -122,7 +130,7 @@ void VideoLoaderImpl::loadFramesFromVideoFile()
         }
 
         // 1. 데이터 패킷 생성
-        auto frame_packet = ::createImagePacketFromMat(frame);
+        auto frame_packet = ::createImagePacketFromMat(frame, ++frame_id_);
 
         // 2. 이벤트를 생성하여 큐에 Push (std::variant 사용)
         domain::model::Event evt;
@@ -148,7 +156,7 @@ void VideoLoaderImpl::loadFramesFromCameraDevice()
             continue;
         }
 
-        auto frame_packet = ::createImagePacketFromMat(frame);
+        auto frame_packet = ::createImagePacketFromMat(frame, ++frame_id_);
 
         domain::model::Event evt;
         evt.type = domain::model::EventType::IMAGE;
@@ -173,7 +181,7 @@ void VideoLoaderImpl::loadFramesFromRtspStream()
             continue;
         }
 
-        auto frame_packet = ::createImagePacketFromMat(frame);
+        auto frame_packet = ::createImagePacketFromMat(frame, ++frame_id_);
 
         domain::model::Event evt;
         evt.type = domain::model::EventType::IMAGE;
@@ -202,7 +210,7 @@ void VideoLoaderImpl::loadFramesFromFrameSet()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
 
-        auto frame_packet = ::createImagePacketFromMat(frm);
+        auto frame_packet = ::createImagePacketFromMat(frm, ++frame_id_);
 
         domain::model::Event evt;
         evt.type = domain::model::EventType::IMAGE;

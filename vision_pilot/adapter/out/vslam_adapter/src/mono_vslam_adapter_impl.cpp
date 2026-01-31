@@ -1,17 +1,17 @@
-#include "vslam_adapter_impl.hpp"
+#include "mono_vslam_adapter_impl.hpp"
 #include "gaia_log.hpp"
 #include "stella_vslam/config.h"
 #include <exception>
 
 namespace vp::adapter::out
 {
-VslamAdapterImpl::VslamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
+MonoVSlamAdapterImpl::MonoVSlamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
     : vslam_config_{vslam_config}
 {
     LOG_TRA("");
 }
 
-VslamAdapterImpl::~VslamAdapterImpl()
+MonoVSlamAdapterImpl::~MonoVSlamAdapterImpl()
 {
     LOG_TRA("");
     if (slam_system_)
@@ -20,7 +20,7 @@ VslamAdapterImpl::~VslamAdapterImpl()
     }
 }
 
-bool VslamAdapterImpl::initialize()
+bool MonoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
@@ -43,7 +43,7 @@ bool VslamAdapterImpl::initialize()
     return true;
 }
 
-domain::model::Pose VslamAdapterImpl::update(const domain::model::ImagePacket &image, uint64_t timestamp)
+domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacket &image, uint64_t timestamp)
 {
     LOG_TRA("");
 
@@ -58,12 +58,19 @@ domain::model::Pose VslamAdapterImpl::update(const domain::model::ImagePacket &i
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
-    const auto rows = image.height;
-    const auto cols = image.width;
-    const auto channels = image.channels;
+    const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
+    if (image.format != domain::model::ImageFormat::MONO || mono_payload == nullptr)
+    {
+        LOG_ERR("Invalid image payload for Mono VSLAM Adapter.");
+        return domain::model::Pose{};
+    }
+
+    const auto rows = mono_payload->frame.height;
+    const auto cols = mono_payload->frame.width;
+    const auto channels = mono_payload->frame.channels;
     auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
 
-    cv::Mat img(rows, cols, type, const_cast<uint8_t *>(image.data.data())); // NOLINT: OPENCV
+    cv::Mat img(rows, cols, type, const_cast<uint8_t *>(mono_payload->frame.data.data())); // NOLINT: OPENCV
     if (img.empty())
     {
         LOG_ERR("Failed to decode frame at ts: {}", timestamp);

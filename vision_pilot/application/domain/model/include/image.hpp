@@ -1,20 +1,57 @@
 #pragma once
 #include <cstdint>
+#include <string>
+#include <variant>
 #include <vector>
+
 namespace vp::domain::model
 {
+
+// 공통 이미지 데이터 구조
+struct RawImage
+{
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    int step = 0;
+    std::vector<uint8_t> data;
+};
+
+struct MonoImagePacket
+{
+    RawImage frame;
+};
+
+struct StereoImagePacket
+{
+    RawImage left;
+    RawImage right;
+};
+
+enum class ImageEncoding
+{
+    UNKNOWN = 0,
+    MONO8,
+    RGB8,
+    BGR8
+};
+
+enum class ImageFormat
+{
+    UNKNOWN = 0,
+    MONO,
+    STEREO
+};
+
 struct ImagePacket
 {
-    int width = 0;             // 프레임 폭
-    int height = 0;            // 프레임 높이
-    int channels = 0;          // 채널 수: 1=Gray, 3=RGB 등
-    std::vector<uint8_t> data; // row-major order, size = width*height*channels
+    ImageFormat format = ImageFormat::MONO;
+    ImageEncoding encoding = ImageEncoding::BGR8;
+    uint64_t frame_id = 0;
+    uint64_t timestamp = 0;
 
-    uint64_t timestamp; // 프레임 수신 시점
-
-    ImagePacket() = default;
-
-    ImagePacket(int w, int h, int c)
-        : width(w), height(h), channels(c), data(w * h * c) {}
+    // variant를 통해 타입 안전성 확보
+    std::variant<MonoImagePacket, StereoImagePacket> payload;
 };
+
 } // namespace vp::domain::model

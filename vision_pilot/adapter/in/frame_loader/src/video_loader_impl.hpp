@@ -35,5 +35,7 @@ private:
 
     infrastructure::event::EventQueue &event_queue_; // 포트 대신 큐 참조
     std::unique_ptr<cv::VideoCapture> video_capture_;
+
+    uint64_t frame_id_ = 0;
 };
 } // namespace vp::adapter::in::frame_loader

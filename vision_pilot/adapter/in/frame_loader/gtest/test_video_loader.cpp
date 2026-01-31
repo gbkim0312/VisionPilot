@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <variant>
 
 namespace vp::adapter::in::frame_loader
 {
@@ -65,17 +66,27 @@ TEST_F(VideoLoaderTest, FrameReceptionWithDisplay)
     EXPECT_CALL(mock_receive_port_, onFrameReceived(testing::_))
         .WillRepeatedly(testing::Invoke([](const domain::model::ImagePacket &packet)
                                         {
-            if (packet.data.empty()){ return;}
+        if (packet.payload.index() != 0)
+        {
+            return;
+        } // MonoImagePacket인지 확인
 
-            cv::Mat frame(packet.height,
-                          packet.width,
-                          packet.channels == 3 ? CV_8UC3 : CV_8UC1, //NOLINT: OPENCV
-                          const_cast<void*>(static_cast<const void*>(packet.data.data())));
+        const auto *mono_packet = std::get_if<vp::domain::model::MonoImagePacket>(&packet.payload);
+        if (mono_packet == nullptr)
+        {
+            return;
+        }
 
-            if (!frame.empty()) {
-                cv::imshow("Test Debug Display", frame);
-                cv::waitKey(1); // 창을 갱신하기 위해 필수
-            } }));
+        cv::Mat frame(mono_packet->frame.height,
+                      mono_packet->frame.width,
+                      mono_packet->frame.channels == 3 ? CV_8UC3 : CV_8UC1, // NOLINT: OPENCV
+                      const_cast<void *>(static_cast<const void *>(mono_packet->frame.data.data())));
+
+        if (!frame.empty())
+        {
+            cv::imshow("Test Debug Display", frame);
+            cv::waitKey(1); // 창을 갱신하기 위해 필수
+        } }));
 
     EXPECT_TRUE(loader_->start());
 

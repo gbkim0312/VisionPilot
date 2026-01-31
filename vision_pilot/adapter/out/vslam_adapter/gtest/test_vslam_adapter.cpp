@@ -1,9 +1,9 @@
 #include "gaia_dir.hpp"
 #include "gaia_log.hpp"
-#include "vslam_adapter.hpp"
+#include "image.hpp"
+#include "mono_vslam_adapter.hpp"
 #include <algorithm>
 #include <gtest/gtest.h>
-#include <iostream>
 #include <opencv2/opencv.hpp>
 
 namespace vp::adapter::out
@@ -29,7 +29,7 @@ protected:
         ASSERT_TRUE(vp::isFileExist(vslam_config_.vocabPath)) << "Vocab file not found: " << vslam_config_.vocabPath;
 
         // 3. 어댑터 초기화 및 검증
-        vslam_adapter_ = std::make_unique<VslamAdapter>(vslam_config_);
+        vslam_adapter_ = std::make_unique<MonoVSlamAdapter>(vslam_config_);
         ASSERT_TRUE(vslam_adapter_->initialize()) << "VSLAM Adapter initialization failed!";
 
         // 4. vp 유틸리티를 사용한 이미지 파일 목록 읽기
@@ -60,19 +60,27 @@ protected:
     }
 
     // OpenCV Mat -> ImagePacket 변환 헬퍼
-    domain::model::ImagePacket createPacket(const cv::Mat &frame, uint64_t ts)
+    domain::model::ImagePacket createPacket(const cv::Mat &frame, uint64_t frame_id, uint64_t ts)
     {
         domain::model::ImagePacket packet;
-        packet.width = frame.cols;
-        packet.height = frame.rows;
-        packet.channels = frame.channels();
+        packet.format = domain::model::ImageFormat::MONO;
+        packet.encoding = frame.channels() == 3 ? domain::model::ImageEncoding::BGR8 : domain::model::ImageEncoding::MONO8;
+        packet.frame_id = frame_id;
         packet.timestamp = ts;
-        packet.data.assign(frame.data, frame.data + (frame.total() * frame.elemSize())); // NOLINT: OPENCV
+
+        domain::model::MonoImagePacket mono_payload;
+        mono_payload.frame.width = frame.cols;
+        mono_payload.frame.height = frame.rows;
+        mono_payload.frame.channels = frame.channels();
+        mono_payload.frame.step = static_cast<int>(frame.step);
+        mono_payload.frame.data.assign(frame.data, frame.data + (frame.total() * frame.elemSize())); // NOLINT: OPENCV
+        packet.payload = mono_payload;
+
         return packet;
     }
 
     config::VslamAdapterConfig vslam_config_;
-    std::unique_ptr<VslamAdapter> vslam_adapter_;
+    std::unique_ptr<MonoVSlamAdapter> vslam_adapter_;
     std::vector<std::string> image_filenames_;
     std::vector<std::string> image_full_paths_;
     std::vector<uint64_t> timestamps_;
@@ -101,7 +109,7 @@ TEST_F(VslamAdapterTest, ProcessKittiSequence)
     for (int i = 0; i < test_frame_count; ++i)
     {
         cv::Mat img = cv::imread(image_full_paths_[i], cv::IMREAD_UNCHANGED);
-        auto packet = createPacket(img, timestamps_[i]);
+        auto packet = createPacket(img, i, timestamps_[i]);
         auto pose = vslam_adapter_->update(packet, packet.timestamp);
 
         if (!pose.is_lost)

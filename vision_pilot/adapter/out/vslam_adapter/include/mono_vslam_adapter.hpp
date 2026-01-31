@@ -5,18 +5,18 @@
 
 namespace vp::adapter::out
 {
-class VslamAdapterImpl;
+class MonoVSlamAdapterImpl;
 
-class VslamAdapter : public vp::port::out::LocalizationPort
+class MonoVSlamAdapter : public vp::port::out::LocalizationPort
 {
 public:
-    VslamAdapter(const config::VslamAdapterConfig &vslam_config);
-    ~VslamAdapter() override;
+    MonoVSlamAdapter(const config::VslamAdapterConfig &vslam_config);
+    ~MonoVSlamAdapter() override;
 
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
 
 private:
-    std::unique_ptr<VslamAdapterImpl> impl_;
+    std::unique_ptr<MonoVSlamAdapterImpl> impl_;
 };
 } // namespace vp::adapter::out

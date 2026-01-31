@@ -1,16 +1,17 @@
 #pragma once
 #include "image.hpp"
+#include "mono_vslam_adapter.hpp"
 #include "pose.hpp"
 #include "vslam_config.hpp"
 #include <stella_vslam/system.h>
 
 namespace vp::adapter::out
 {
-class VslamAdapterImpl
+class MonoVSlamAdapterImpl
 {
 public:
-    VslamAdapterImpl(const config::VslamAdapterConfig &vslam_config);
-    ~VslamAdapterImpl();
+    MonoVSlamAdapterImpl(const config::VslamAdapterConfig &vslam_config);
+    ~MonoVSlamAdapterImpl();
 
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp);
