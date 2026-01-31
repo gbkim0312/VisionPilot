@@ -8,6 +8,7 @@ namespace vp::adapter::out
 MonoVSlamAdapter::MonoVSlamAdapter(const config::VslamAdapterConfig &vslam_config)
     : impl_(std::make_unique<MonoVSlamAdapterImpl>(vslam_config))
 {
+    LOG_TRA("");
 }
 
 MonoVSlamAdapter::~MonoVSlamAdapter()

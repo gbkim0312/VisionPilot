@@ -36,21 +36,6 @@ if(NOT leveldb_POPULATED)
     add_subdirectory(${leveldb_SOURCE_DIR} ${leveldb_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-FetchContent_Declare(
-    spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG v1.10.0
-)
-FetchContent_GetProperties(spdlog)
-
-if(NOT spdlog_POPULATED)
-    FetchContent_Populate(spdlog)
-    set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "Enable spdlog tests" FORCE)
-    set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "Enable spdlog bench" FORCE)
-    set(SPDLOG_BUILD_SHARED ON CACHE BOOL "Force spdlog to shared" FORCE)
-    add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
 # New ZIP lib miniz
 FetchContent_Declare(
     miniz
@@ -86,6 +71,8 @@ PUBLIC
 PRIVATE
     ZoneDetect/library # TODO: 느린 ZoneDetect 대신 다른 빠른 도구가 없나 탐색 필요
 )
+
+find_package(spdlog CONFIG REQUIRED)
 
 # 의존성 설정
 target_link_libraries(${PROJECT_NAME}

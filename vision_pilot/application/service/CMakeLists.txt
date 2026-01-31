@@ -38,7 +38,7 @@ target_include_directories(
 target_link_libraries(
   ${PROJECT_NAME}_test
   PUBLIC ${_LINK_PUBLIC_LIBRARIES}
-  PRIVATE ${_LINK_PRIVATE_LIBRARIES})
+  PRIVATE ${_LINK_PRIVATE_LIBRARIES} vp::adapter_visualization vp::adapter_vslam)
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_test)
 

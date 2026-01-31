@@ -1,17 +1,17 @@
 /* DirMan.cpp */
 
 #include "gaia_dir_man.hpp"
-#include "gaia_dir.hpp"                // for joinDir, saveFile, fileNameExt
-#include "gaia_exception.hpp"          // for SysException, THROWLOG
-#include "gaia_string_util.hpp"        // for stricmp
-#include <algorithm>                   // for sort, max
-#include <cctype>                      // for isxdigit
-#include <cerrno>                      // for errno
-#include <cstdint>                     // for uint16_t
-#include <cstring>                     // for strerror, strcmp
-#include <dirent.h>                    // for closedir, dirent, opendir
-#include <spdlog/fmt/bundled/format.h> // for format
-#include <sys/stat.h>                  // for stat, lstat, S_ISREG, S_ISDIR
+#include "gaia_dir.hpp"         // for joinDir, saveFile, fileNameExt
+#include "gaia_exception.hpp"   // for SysException, THROWLOG
+#include "gaia_string_util.hpp" // for stricmp
+#include <algorithm>            // for sort, max
+#include <cctype>               // for isxdigit
+#include <cerrno>               // for errno
+#include <cstdint>              // for uint16_t
+#include <cstring>              // for strerror, strcmp
+#include <dirent.h>             // for closedir, dirent, opendir
+#include <fmt/format.h>         // for format
+#include <sys/stat.h>           // for stat, lstat, S_ISREG, S_ISDIR
 
 namespace vp
 {

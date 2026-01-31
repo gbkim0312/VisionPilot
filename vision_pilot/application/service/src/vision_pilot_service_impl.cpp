@@ -17,8 +17,8 @@ VisionPilotServiceImpl::~VisionPilotServiceImpl()
 void VisionPilotServiceImpl::onFrameReceived(const domain::model::ImagePacket &frame)
 {
     LOG_TRA("");
-    auto pose = localization_port_.update(frame, 0);
-    LOG_INF("Received Frame Processed. Pose: x={}, y={}, z={}", pose.x, pose.y, pose.z);
+    auto pose = localization_port_.update(frame, frame.timestamp);
+    LOG_DBG("Received Frame Processed. Pose: x={}, y={}, z={}", pose.x, pose.y, pose.z);
     visualization_port_.render(pose, frame);
 }
 

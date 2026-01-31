@@ -44,7 +44,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VslamViewerType,
 
 struct VslamViewerConfig
 {
-    VslamViewerType viewerType = VslamViewerType::NONE;
+    VslamViewerType viewerType = VslamViewerType::OPENCV;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamViewerConfig,

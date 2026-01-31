@@ -27,6 +27,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_compile_definitions(DEBUG)
+endif()
+
 if(NOT OpenCV_DIR)
     set(OpenCV_DIR "${PROJECT_ROOT_DIR}/${CMAKE_INSTALL_PREFIX}/lib/cmake/opencv4" CACHE PATH "OpenCV cmake path" FORCE)
 endif()
@@ -135,7 +139,7 @@ install(TARGETS config event vp_frame_loader port_in port_out assembly gaia adap
 
 # 3. FetchContent로 빌드된 외부 라이브러리들 설치
 # spdlog, gtest, benchmark 등은 각 프로젝트에서 정의한 타겟 이름을 사용합니다.
-install(TARGETS spdlog gtest gtest_main gmock benchmark benchmark_main
+install(TARGETS gtest gtest_main gmock benchmark benchmark_main
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     COMPONENT vp_dependencies

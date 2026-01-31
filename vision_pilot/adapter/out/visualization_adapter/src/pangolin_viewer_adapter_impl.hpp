@@ -3,7 +3,6 @@
 #include "image.hpp"
 #include "pose.hpp"
 #include "vslam_config.hpp"
-#include <memory>
 #include <vector>
 
 namespace vp::adapter::out

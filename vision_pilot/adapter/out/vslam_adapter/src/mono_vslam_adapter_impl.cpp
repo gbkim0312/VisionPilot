@@ -2,6 +2,7 @@
 #include "gaia_log.hpp"
 #include "stella_vslam/config.h"
 #include <exception>
+#include <opencv2/imgcodecs.hpp>
 
 namespace vp::adapter::out
 {
@@ -26,13 +27,19 @@ bool MonoVSlamAdapterImpl::initialize()
 
     try
     {
+        LOG_INF("Loading VSLAM configuration from: {}", vslam_config_.vslamConfigFilePath);
         auto config = std::make_shared<stella_vslam::config>(vslam_config_.vslamConfigFilePath);
-        slam_system_ = std::make_shared<stella_vslam::system>(config, vslam_config_.vocabPath);
+        LOG_INF("VSLAM configuration loaded successfully.");
 
+        LOG_INF("Creating VSLAM system...");
+        slam_system_ = std::make_shared<stella_vslam::system>(config, vslam_config_.vocabPath);
+        LOG_INF("VSLAM system created successfully.");
+
+        LOG_INF("Starting up VSLAM system...");
         slam_system_->startup();
+        LOG_INF("VSLAM system started successfully.");
 
         is_initialized_ = true;
-        LOG_INF("VSLAM initialized successfully.");
     }
     catch (const std::exception &e)
     {
@@ -55,6 +62,7 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
 
     while (slam_system_->loop_BA_is_running())
     {
+        LOG_DBG("Waiting for loop bundle adjustment to complete...");
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
@@ -71,6 +79,7 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
 
     cv::Mat img(rows, cols, type, const_cast<uint8_t *>(mono_payload->frame.data.data())); // NOLINT: OPENCV
+
     if (img.empty())
     {
         LOG_ERR("Failed to decode frame at ts: {}", timestamp);
@@ -79,6 +88,9 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
 
     constexpr auto kMicroSecondsInSecond = 1000000;
     double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
+
+    LOG_DBG("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, timestamp, channels == 3 ? "true" : "false", time_in_seconds);
+
     auto raw_pose = slam_system_->feed_monocular_frame(img, time_in_seconds);
 
     domain::model::Pose pose;
