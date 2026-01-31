@@ -25,4 +25,9 @@ domain::model::Pose MonoVSlamAdapter::update(const domain::model::ImagePacket &i
 {
     return impl_->update(image, timestamp);
 }
+
+bool MonoVSlamAdapter::stop()
+{
+    return impl_->stop();
+}
 } // namespace vp::adapter::out

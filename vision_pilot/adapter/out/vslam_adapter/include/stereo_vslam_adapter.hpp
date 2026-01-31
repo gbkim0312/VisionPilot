@@ -5,19 +5,19 @@
 
 namespace vp::adapter::out
 {
-class MonoVSlamAdapterImpl;
+class StereoVSlamAdapterImpl;
 
-class MonoVSlamAdapter : public vp::port::out::LocalizationPort
+class StereoVSlamAdapter : public vp::port::out::LocalizationPort
 {
 public:
-    MonoVSlamAdapter(const config::VslamAdapterConfig &vslam_config);
-    ~MonoVSlamAdapter() override;
+    StereoVSlamAdapter(const config::VslamAdapterConfig &vslam_config);
+    ~StereoVSlamAdapter() override;
 
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
     bool stop();
 
 private:
-    std::unique_ptr<MonoVSlamAdapterImpl> impl_;
+    std::unique_ptr<StereoVSlamAdapterImpl> impl_;
 };
 } // namespace vp::adapter::out

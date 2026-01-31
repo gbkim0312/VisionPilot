@@ -64,6 +64,7 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     {
         LOG_DBG("Waiting for loop bundle adjustment to complete...");
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        // TODO(GBKIM): 실제 구현 시에는 빈 포즈나 이 전 pose를 내보내도록 고려 필요
     }
 
     const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
@@ -96,7 +97,6 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     domain::model::Pose pose;
     if (raw_pose)
     {
-        // 3. Stella의 Eigen Matrix -> 우리 도메인 모델(Pose)로 매핑
         const Eigen::Matrix4d mat = raw_pose->cast<double>();
         const Eigen::Matrix3d rot = mat.block<3, 3>(0, 0);
         const Eigen::Vector3d trans = mat.block<3, 1>(0, 3);
@@ -121,4 +121,23 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
 
     return pose;
 }
+
+bool MonoVSlamAdapterImpl::stop()
+{
+    LOG_TRA("Stopping VSLAM Adapter...");
+
+    if (slam_system_)
+    {
+        slam_system_->shutdown();
+        LOG_INF("VSLAM system shut down successfully.");
+    }
+    else
+    {
+        LOG_WRN("VSLAM system was not initialized.");
+    }
+
+    is_initialized_ = false;
+    return true;
+}
+
 } // namespace vp::adapter::out
