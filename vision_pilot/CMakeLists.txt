@@ -3,6 +3,11 @@ project(vp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(OpenGL_GL_PREFERENCE GLVND)
+
+if(NOT PROJECT_ROOT_DIR)
+    set(PROJECT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." CACHE PATH "Project root directory" FORCE)
+endif()
 
 if(NOT CMAKE_BINARY_DIR)
     set(CMAKE_BINARY_DIR "${PROJECT_ROOT_DIR}/build/debug/vision_pilot" CACHE PATH "Build directory" FORCE)
@@ -93,11 +98,11 @@ FetchContent_MakeAvailable(googlebenchmark)
 
 # --- 하위 디렉토리 추가 ---
 add_subdirectory(gaia)
-add_subdirectory_with_static_analysis(config)
-add_subdirectory_with_static_analysis(infrastructure)
-add_subdirectory_with_static_analysis(adapter)
-add_subdirectory_with_static_analysis(application)
-add_subdirectory_with_static_analysis(assembly)
+add_subdirectory(config)
+add_subdirectory(infrastructure)
+add_subdirectory(adapter)
+add_subdirectory(application)
+add_subdirectory(assembly)
 
 # --- 타겟 생성 및 링크 ---
 add_executable(${PROJECT_NAME} main.cpp)

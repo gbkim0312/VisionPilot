@@ -1,7 +1,6 @@
 #pragma once
 #include "image.hpp"
 #include "pose.hpp"
-#include <vector>
 
 namespace vp::port::out
 {

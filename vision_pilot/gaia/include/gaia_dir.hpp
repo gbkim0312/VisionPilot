@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef> // for size_t
-#include <cstdint> // for uint64_t
 #include <string>  // for string, allocator, operator+, char_traits
 #include <vector>  // for vector
 

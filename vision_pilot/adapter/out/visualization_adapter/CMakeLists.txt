@@ -1,12 +1,30 @@
 project(adapter_visualization)
 
+cmake_policy(SET CMP0072 NEW)
+set(OpenGL_GL_PREFERENCE GLVND)
+
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
+
 set(_INCLUDE_PUBLIC include)
-set(_INCLUDE_PRIVATE src)
+set(_INCLUDE_PRIVATE src ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
 set(_LINK_PUBLIC_LIBRARIES vp::model vp::config vp::port_out)
 set(_LINK_PRIVATE_LIBRARIES
     stella_vslam::stella_vslam
+    opencv_core
+    opencv_imgproc
+    opencv_highgui
+    opencv_imgcodecs
+
+    OpenGL::GL
+    OpenGL::GLU
+    GLEW::GLEW
+
+    Eigen3::Eigen
 )
+
+
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
 
@@ -14,6 +32,10 @@ add_library(${PROJECT_NAME} STATIC
     ${ALL_DEPS})
 
 add_library(vp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GLES)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CLANG_TIDY "")
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC ${_INCLUDE_PUBLIC}
@@ -32,6 +54,9 @@ set(_INCLUDE_PRIVATE ${_INCLUDE_PRIVATE} gtest)
 set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgui)
 
 add_executable(${PROJECT_NAME}_test ${ALL_DEPS})
+
+target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
+
 target_include_directories(
   ${PROJECT_NAME}_test
   PUBLIC ${_INCLUDE_PUBLIC}
