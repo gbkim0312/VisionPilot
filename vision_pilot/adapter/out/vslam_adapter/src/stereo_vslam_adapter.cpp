@@ -1,4 +1,5 @@
 #include "stereo_vslam_adapter.hpp"
+#include "gaia_log.hpp"
 #include "stereo_vslam_adapter_impl.hpp"
 
 namespace vp::adapter::out
@@ -7,7 +8,11 @@ StereoVSlamAdapter::StereoVSlamAdapter(const config::VslamAdapterConfig &vslam_c
     : impl_(std::make_unique<StereoVSlamAdapterImpl>(vslam_config))
 {
 }
-StereoVSlamAdapter::~StereoVSlamAdapter() = default;
+
+StereoVSlamAdapter::~StereoVSlamAdapter()
+{
+    LOG_TRA("");
+}
 
 bool StereoVSlamAdapter::initialize()
 {

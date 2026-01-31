@@ -1,5 +1,6 @@
 #include "stereo_vslam_adapter_impl.hpp"
 #include "gaia_log.hpp"
+#include <stella_vslam/config.h>
 
 namespace vp::adapter::out
 {
@@ -7,6 +8,7 @@ StereoVSlamAdapterImpl::StereoVSlamAdapterImpl(const config::VslamAdapterConfig 
     : vslam_config_(vslam_config)
 {
 }
+
 StereoVSlamAdapterImpl::~StereoVSlamAdapterImpl()
 {
     LOG_TRA("");
@@ -77,9 +79,54 @@ domain::model::Pose StereoVSlamAdapterImpl::update(const domain::model::ImagePac
     const auto &left_frame = stereo_payload->left;
     const auto &right_frame = stereo_payload->right;
 
-    // TODO(GBKIM): Stereo 이미지 처리 로직 구현 필요
+    const auto rows = left_frame.height;
+    const auto cols = left_frame.width;
+    const auto channels = left_frame.channels;
+    auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
+
+    cv::Mat left_img(rows, cols, type, const_cast<uint8_t *>(left_frame.data.data()));   // NOLINT: OPENCV
+    cv::Mat right_img(rows, cols, type, const_cast<uint8_t *>(right_frame.data.data())); // NOLINT: OPENCV
+
+    if (left_img.empty() || right_img.empty())
+    {
+        LOG_ERR("Failed to decode stereo frames.");
+        return domain::model::Pose{};
+    }
+
+    constexpr auto kMicroSecondsInSecond = 1000000;
+    double time_in_seconds = static_cast<double>(image.timestamp) / kMicroSecondsInSecond;
+
+    LOG_DBG("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, image.timestamp, channels == 3 ? "true" : "false", time_in_seconds);
+
+    auto raw_pose = slam_system_->feed_stereo_frame(left_img, right_img, time_in_seconds);
 
     domain::model::Pose pose;
+    if (raw_pose)
+    {
+        // 3. Stella의 Eigen Matrix -> 우리 도메인 모델(Pose)로 매핑 --- IGNORE ---
+        const Eigen::Matrix4d mat = raw_pose->cast<double>();
+        const Eigen::Matrix3d rot = mat.block<3, 3>(0, 0);
+        const Eigen::Vector3d trans = mat.block<3, 1>(0, 3);
+        const Eigen::Quaterniond q(rot);
+
+        pose.x = trans.x();
+        pose.y = trans.y();
+        pose.z = trans.z();
+        pose.qx = q.x();
+        pose.qy = q.y();
+        pose.qz = q.z();
+        pose.qw = q.w();
+        pose.is_lost = false;
+
+        LOG_DBG("Pose: Position({:.3f}, {:.3f}, {:.3f}), Orientation({:.3f}, {:.3f}, {:.3f}, {:.3f})",
+                pose.x, pose.y, pose.z,
+                pose.qx, pose.qy, pose.qz, pose.qw);
+    }
+    else
+    {
+        LOG_WRN("Pose could not be estimated for the current frame.");
+        pose.is_lost = true;
+    }
 
     return pose;
 }

@@ -117,7 +117,9 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
         pose.qz = q.z();
         pose.is_lost = false;
 
-        LOG_INF("Pose Updated: x={:.2f}, y={:.2f}, z={:.2f}", pose.x, pose.y, pose.z);
+        LOG_DBG("Pose: Position({:.3f}, {:.3f}, {:.3f}), Orientation({:.3f}, {:.3f}, {:.3f}, {:.3f})",
+                pose.x, pose.y, pose.z,
+                pose.qx, pose.qy, pose.qz, pose.qw);
     }
     else
     {

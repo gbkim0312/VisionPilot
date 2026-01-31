@@ -56,15 +56,15 @@ void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose, const doma
                           },
                           [&](const domain::model::StereoImagePacket &stereo)
                           {
-                              // [Stereo] 좌/우 영상을 가로로 이어붙임 (Side-by-Side)
+                              // [Stereo] 좌/우 영상을 세로로 이어붙임 (Side-by-Side)
                               int type = (stereo.left.channels == 1) ? CV_8UC1 : CV_8UC3;
                               cv::Mat left_mat(stereo.left.height, stereo.left.width, type,
                                                const_cast<uint8_t *>(stereo.left.data.data()));
                               cv::Mat right_mat(stereo.right.height, stereo.right.width, type,
                                                 const_cast<uint8_t *>(stereo.right.data.data()));
 
-                              // 두 영상을 가로로 결합
-                              cv::hconcat(left_mat, right_mat, canvas);
+                              // 두 영상을 세로로 결합
+                              cv::vconcat(left_mat, right_mat, canvas);
                           }},
                frame.payload);
 
