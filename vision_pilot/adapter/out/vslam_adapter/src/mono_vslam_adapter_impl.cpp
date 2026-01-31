@@ -25,6 +25,12 @@ bool MonoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
+    if (is_initialized_)
+    {
+        LOG_INF("VSLAM Adapter is already initialized.");
+        return true;
+    }
+
     try
     {
         LOG_INF("Loading VSLAM configuration from: {}", vslam_config_.vslamConfigFilePath);
@@ -125,6 +131,12 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
 bool MonoVSlamAdapterImpl::stop()
 {
     LOG_TRA("Stopping VSLAM Adapter...");
+
+    if (!is_initialized_)
+    {
+        LOG_WRN("VSLAM Adapter is not initialized.");
+        return true;
+    }
 
     if (slam_system_)
     {
