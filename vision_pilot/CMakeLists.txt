@@ -122,7 +122,7 @@ install(TARGETS ${PROJECT_NAME}
 
 # 2. 직접 만든 서브 모듈 라이브러리들 설치 (vp::config, vp::adapter 등)
 # 하위 CMakeLists.txt에서 이미 정의되어 있다면 여기서 타겟 이름으로 모아서 설치 가능
-install(TARGETS config event vp_frame_loader port_in assembly gaia
+install(TARGETS config event vp_frame_loader port_in port_out assembly gaia adapter_vslam
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     COMPONENT vp_libraries

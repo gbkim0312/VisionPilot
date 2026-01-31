@@ -1,0 +1,132 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "files.trimTrailingWhitespace": true,
+    "clangd.enable": true,
+    "cmake.generator": "Ninja",
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build/debug/vision_pilot",
+    "cmake.statusbar.visibility": "compact",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clang-format.executable": "/usr/bin/clang-format",
+    "clang-format.style": "${workspaceFolder}/.clang-format",
+    "clang-format.language.c.enable": true,
+    "clang-format.language.cpp.enable": true,
+    "cmake.parallelJobs": 0,
+    "cmake.statusbar.advanced": {
+        "kit": {
+            "visibility": "hidden"
+        },
+        "ctest": {
+            "visibility": "hidden"
+        },
+        "status": {
+            "visibility": "hidden"
+        },
+        "launch": {
+            "visibility": "hidden"
+        }
+    },
+    "cmake.debugConfig": {
+        "cwd": "${command:cmake.buildDirectory}/test",
+        "args": [
+            // "--gtest_filter=TestPolicyReqCertGen.\\*",
+            // "--gtest_repeat=10"
+            // "--help",
+            // "-o",
+            // "\"get http://google.co.kr\""
+        ]
+    },
+    "cmake.configureArgs": [
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_INSTALL_PREFIX=${workspaceFolder}/build/debug/install",
+        // 마스터 스크립트가 만들어놓은 install 폴더를 참조하게 함
+        "-DCMAKE_PREFIX_PATH=${workspaceFolder}/build/debug/install",
+        "-DOpenCV_DIR=${workspaceFolder}/build/debug/install/lib/cmake/opencv4",
+        "-Dstella_vslam_DIR=${workspaceFolder}/build/debug/install/lib/cmake/stella_vslam"
+    ],
+    "cmake.buildArgs": [
+        "install"
+    ],
+    "[cpp]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        // "editor.inlayHints.enabled": "off"
+    },
+    "files.associations": {
+        "*.ejs": "html",
+        "*.json": "jsonc",
+        "any": "cpp",
+        "optional": "cpp",
+        "variant": "cpp",
+        "cstdarg": "cpp",
+        "iosfwd": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "atomic": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "cctype": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "cinttypes": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "forward_list": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "ratio": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "mutex": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "shared_mutex": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp",
+        "cfenv": "cpp",
+        "typeinfo": "cpp",
+        "valarray": "cpp",
+        "bit": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/gbkim/project/VisionPilot/vision_pilot"
+}

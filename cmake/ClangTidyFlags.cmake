@@ -8,6 +8,7 @@ set(V2X2_CLANG_TIDY_FLAGS
 "bugprone-*,\
 -bugprone-narrowing-conversions,\
 -bugprone-lambda-function-name,\
+-bugprone-easily-swappable-parameters,\
 modernize-*,\
 -modernize-use-trailing-return-type,\
 -modernize-use-emplace,\
@@ -65,7 +66,6 @@ readability-avoid-const-params-in-decls,\
 readability-braces-around-statements,\
 readability-const-return-type,\
 readability-container-size-empty,\
-readability-convert-member-functions-to-static,\
 readability-delete-null-pointer,\
 readability-deleted-default,\
 readability-implicit-bool-conversion,\

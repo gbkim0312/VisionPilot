@@ -6,6 +6,7 @@ logs/
 **/build/
 **/saved_imgs/
 **/*.pt
+**/dataset/
 imgs/
 **/__pycache__/
 .venv/

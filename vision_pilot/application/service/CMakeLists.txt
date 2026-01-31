@@ -4,7 +4,7 @@ set(_INCLUDE_PUBLIC include)
 set(_INCLUDE_PRIVATE src)
 
 set(_LINK_PUBLIC_LIBRARIES vp::port_in)
-set(_LINK_PRIVATE_LIBRARIES )
+set(_LINK_PRIVATE_LIBRARIES  vp::port_out vp::model gaia::gaia)
 
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})

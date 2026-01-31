@@ -1,6 +1,12 @@
 #pragma once
 #include "frame_receive_usecase.hpp"
+#include "visualization_port.hpp"
 #include <memory>
+
+namespace vp::port::out
+{
+class LocalizationPort;
+}
 
 namespace vp::service
 {
@@ -9,7 +15,7 @@ class VisionPilotServiceImpl;
 class VisionPilotService : public vp::port::in::FrameReceiveUseCase
 {
 public:
-    VisionPilotService();
+    VisionPilotService(vp::port::out::LocalizationPort &localization_port, vp::port::out::VisualizationPort &visualization_port);
     ~VisionPilotService();
 
     void onFrameReceived(const domain::model::ImagePacket &frame) override;
