@@ -22,7 +22,6 @@ public:
 private:
     void run();
 
-    // 참조 멤버 변수
     EventQueue &queue_;
     port::in::FrameReceiveUseCase &image_port_;
 

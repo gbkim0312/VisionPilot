@@ -6,21 +6,23 @@ namespace vp::config
 
 enum class VslamMethod
 {
-    ORB_SLAM3 = 0,
-    STELLA_VSLAM = 1,
+    MONOCULAR = 0,
+    STEREO = 1,
+    RGB_D = 2,
     DISABLED = -1
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
                              {
-                                 {VslamMethod::ORB_SLAM3, "orbSlam3"},
-                                 {VslamMethod::STELLA_VSLAM, "stellaVslam"},
+                                 {VslamMethod::MONOCULAR, "monocular"},
+                                 {VslamMethod::STEREO, "stereo"},
+                                 {VslamMethod::RGB_D, "rgbd"},
                                  {VslamMethod::DISABLED, "disabled"},
                              })
 
 struct VslamAdapterConfig
 {
-    VslamMethod method = VslamMethod::STELLA_VSLAM;
+    VslamMethod method = VslamMethod::MONOCULAR;
     std::string vslamConfigFilePath; // VSLAM용 설정 파일 경로
     std::string vocabPath;           // VSLAM용 보캐뷸러리 파일 경로
 };
@@ -34,7 +36,8 @@ enum class VslamViewerType
 {
     NONE = 0,
     PANGOLIN,
-    OPENCV
+    OPENCV,
+    SOCKET
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(VslamViewerType,
@@ -42,6 +45,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VslamViewerType,
                                  {VslamViewerType::NONE, "none"},
                                  {VslamViewerType::PANGOLIN, "pangolin"},
                                  {VslamViewerType::OPENCV, "opencv"},
+                                 {VslamViewerType::SOCKET, "socket"},
                              })
 
 struct VslamViewerConfig

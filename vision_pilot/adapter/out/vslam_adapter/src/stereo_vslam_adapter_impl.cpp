@@ -1,5 +1,7 @@
 #include "stereo_vslam_adapter_impl.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
+#include <exception>
 #include <stella_vslam/config.h>
 
 namespace vp::adapter::out
@@ -7,6 +9,7 @@ namespace vp::adapter::out
 StereoVSlamAdapterImpl::StereoVSlamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
     : vslam_config_(vslam_config)
 {
+    LOG_TRA("");
 }
 
 StereoVSlamAdapterImpl::~StereoVSlamAdapterImpl()
@@ -21,6 +24,11 @@ StereoVSlamAdapterImpl::~StereoVSlamAdapterImpl()
 bool StereoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing Stereo VSLAM Adapter...");
+
+    if (vslam_config_.method != config::VslamMethod::STEREO)
+    {
+        THROWLOG(SysException, "Type mismatch: StereoVSlamAdapterImpl can be used only with STEREO VSLAM method.");
+    }
 
     if (is_initialized_)
     {
@@ -72,8 +80,7 @@ domain::model::Pose StereoVSlamAdapterImpl::update(const domain::model::ImagePac
     const auto *stereo_payload = std::get_if<domain::model::StereoImagePacket>(&image.payload);
     if (image.format != domain::model::ImageFormat::STEREO || stereo_payload == nullptr)
     {
-        LOG_ERR("Invalid image payload for Stereo VSLAM Adapter.");
-        return domain::model::Pose{};
+        THROWLOG(SysException, "Invalid image payload for Stereo VSLAM Adapter. Check VideoLoader configuration.");
     }
 
     const auto &left_frame = stereo_payload->left;

@@ -1,0 +1,33 @@
+{
+    "videoLoaderConfig": {
+        "dataType": "frameSet",
+        "cameraFormat": "stereo",
+        "fps": 10,
+        "frameSize": {
+            "width": 0, //0: default size
+            "height": 0 //0: default size
+        },
+        "stereo": {
+            "leftSource": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0",
+            "rightSource": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_1",
+            "maxImageBufferSize": 50,
+            "colorFormat": "grayscale"
+        }
+    },
+    "vslamAdapterConfig": {
+        "method": "stereo",
+        "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_stereo_00-02.yaml",
+        "vocabPath": "/home/gbkim/project/VisionPilot/vision_pilot/res/etc/orb_vocab.fbow"
+    },
+    "vslamViewerConfig": {
+        "viewerType": "opencv"
+    },
+    "yoloConfig": {
+        "modelPath": "/home/gbkim/project/VisionPilot/vision_pilot/res/etc/yolov8n.onnx",
+        "confThreshold": 0.25,
+        "nmsThreshold": 0.45,
+        "inputWidth": 640,
+        "inputHeight": 640,
+        "useCuda": false
+    }
+}

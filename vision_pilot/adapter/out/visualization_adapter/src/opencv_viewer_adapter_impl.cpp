@@ -1,5 +1,6 @@
 // adapter/out/visualizer/src/opencv_viewer_adapter_impl.cpp
 #include "opencv_viewer_adapter_impl.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -8,7 +9,7 @@ namespace vp::adapter::out
 {
 
 template <class... Ts>
-struct overloaded : Ts... // NOLINT(fuchsia-multiple-inheritance)
+struct overloaded : Ts... // NOLINT(fuchsia -multiple-inheritance)
 {
     using Ts::operator()...;
 };
@@ -30,6 +31,10 @@ OpenCVViewerAdapterImpl::~OpenCVViewerAdapterImpl()
 bool OpenCVViewerAdapterImpl::start()
 {
     LOG_INF("Starting OpenCV Viewer...");
+    if (config_.viewerType != config::VslamViewerType::OPENCV)
+    {
+        THROWLOG(SysException, "Type mismatch: OpenCVViewerAdapterImpl can be used only with OPENCV viewer type.");
+    }
     cv::namedWindow(window_name_, cv::WINDOW_AUTOSIZE);
     return true;
 }

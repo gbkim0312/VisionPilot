@@ -1,4 +1,5 @@
 #include "mono_vslam_adapter_impl.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "stella_vslam/config.h"
 #include <exception>
@@ -24,6 +25,11 @@ MonoVSlamAdapterImpl::~MonoVSlamAdapterImpl()
 bool MonoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
+
+    if (vslam_config_.method != config::VslamMethod::MONOCULAR)
+    {
+        THROWLOG(SysException, "Type mismatch: MonoVSlamAdapterImpl can be used only with MONOCULAR VSLAM method.");
+    }
 
     if (is_initialized_)
     {
@@ -76,8 +82,7 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
     if (image.format != domain::model::ImageFormat::MONO || mono_payload == nullptr)
     {
-        LOG_ERR("Invalid image payload for Mono VSLAM Adapter.");
-        return domain::model::Pose{};
+        THROWLOG(SysException, "Invalid image payload for Mono VSLAM Adapter. Check VideoLoader configuration.");
     }
 
     const auto rows = mono_payload->frame.height;

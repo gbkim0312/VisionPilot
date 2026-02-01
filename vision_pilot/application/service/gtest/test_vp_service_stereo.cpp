@@ -22,7 +22,7 @@ protected:
         const std::string stella_config_dir = vp::joinDir(project_root, "thirdparty/stella_vslam/example/kitti");
 
         // 2. VslamAdapter 설정 채우기
-        vslam_config_.method = config::VslamMethod::STELLA_VSLAM;
+        vslam_config_.method = config::VslamMethod::STEREO;
         vslam_config_.vslamConfigFilePath = vp::joinDir(stella_config_dir, "KITTI_stereo_00-02.yaml");
 
         // 3. YOLOv8 Adapter 설정 채우기

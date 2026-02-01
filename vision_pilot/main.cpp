@@ -101,7 +101,7 @@ bool parseArgs(const std::vector<std::string> &args,
 }
 } // namespace
 
-std::atomic<bool> g_running{false};
+std::atomic<bool> g_running{true};
 
 void signalHandler([[maybe_unused]] int signum)
 {
@@ -141,6 +141,13 @@ int main(int argc, char **argv)
 
     vp::assembly::Assembly assembly(configLoader.getAssemblyConfig());
     assembly.startService();
+
+    while (g_running.load(std::memory_order_acquire))
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    assembly.stopService();
 
     return 0;
 }

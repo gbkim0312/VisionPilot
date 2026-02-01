@@ -7,11 +7,6 @@ namespace vp::adapter::out
 NoSlamAdapter::NoSlamAdapter(const config::VslamAdapterConfig &vslam_config)
     : config_(vslam_config)
 {
-
-    if (config_.method != config::VslamMethod::DISABLED)
-    {
-        THROWLOG(SysException, "NoSlamAdapter can be used only when VSLAM is disabled.");
-    }
     LOG_TRA("");
 }
 

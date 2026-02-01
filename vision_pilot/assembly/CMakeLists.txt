@@ -8,7 +8,16 @@ set(_LINK_PUBLIC_LIBRARIES
   gaia::gaia)
 
 set(_LINK_PRIVATE_LIBRARIES
-  )
+  vp::event
+  vp::port_in
+  vp::port_out
+  vp::vp_frame_loader
+  vp::adapter_yolov8
+  vp::adapter_visualization
+  vp::adapter_vslam
+  vp::model
+  vp::service
+)
 
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})

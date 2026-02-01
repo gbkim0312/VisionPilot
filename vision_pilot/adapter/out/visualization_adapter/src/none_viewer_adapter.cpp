@@ -8,11 +8,6 @@ namespace vp::adapter::out
 NoneViewerAdapter::NoneViewerAdapter(const config::VslamViewerConfig &config)
 {
     LOG_TRA("");
-
-    if (config.viewerType != config::VslamViewerType::NONE)
-    {
-        THROWLOG(SysException, "NoneViewerAdapter created with non-NONE viewer type in config.");
-    }
 }
 NoneViewerAdapter::~NoneViewerAdapter()
 {
