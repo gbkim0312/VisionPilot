@@ -90,23 +90,7 @@ bool MonoVideoLoader::fetchFrameFromVideo()
         return false;
     }
 
-    auto mono_packet = std::make_shared<domain::model::MonoImagePacket>();
-    auto &frame = mono_packet->frame;
-    frame.channels = image.channels();
-    frame.data.assign(image.data, image.data + (image.cols * image.rows * image.channels()));
-    frame.height = image.rows;
-    frame.width = image.cols;
-    frame.step = static_cast<int>(image.step);
-
-    auto image_packet = std::make_shared<domain::model::ImagePacket>(
-        domain::model::ImagePacket{
-            .format = domain::model::ImageFormat::MONO,
-            .encoding = (image.channels() == 1) ? domain::model::ImageEncoding::MONO8 : domain::model::ImageEncoding::BGR8,
-            .frame_id = frame_id_++,
-            .timestamp = getTime64(),
-            .payload = *mono_packet,
-        });
-
+    auto image_packet = this->createImagePacket(image);
     this->pushToQueue(image_packet);
     return true;
 }
@@ -129,7 +113,6 @@ bool MonoVideoLoader::fetchFrameFromFrameSet()
             return true;
         }
 
-        // 버퍼에서 하나 꺼내기 (메모리 이동이라 매우 빠름)
         image = frame_buffer_.front().image;
         frame_buffer_.pop_front();
 
@@ -137,27 +120,7 @@ bool MonoVideoLoader::fetchFrameFromFrameSet()
         buffer_cv_.notify_one();
     }
 
-    // 이후 로직은 기존과 동일 (패킷 생성)
-    auto mono_packet = std::make_shared<domain::model::MonoImagePacket>();
-    auto &frame = mono_packet->frame;
-
-    frame.channels = image.channels();
-    // 여기서 Deep Copy 발생 (Mat -> Packet).
-    // 하이브리드 방식에서는 이 복사 비용만 메인 스레드가 부담함.
-    frame.data.assign(image.data, image.data + (image.cols * image.rows * image.channels()));
-    frame.height = image.rows;
-    frame.width = image.cols;
-    frame.step = static_cast<int>(image.step);
-
-    auto image_packet = std::make_shared<domain::model::ImagePacket>(
-        domain::model::ImagePacket{
-            .format = domain::model::ImageFormat::MONO,
-            .encoding = (image.channels() == 1) ? domain::model::ImageEncoding::MONO8 : domain::model::ImageEncoding::BGR8,
-            .frame_id = frame_id_++,
-            .timestamp = getTime64(),
-            .payload = *mono_packet,
-        });
-
+    auto image_packet = this->createImagePacket(image);
     this->pushToQueue(image_packet);
     return true;
 }
@@ -171,6 +134,11 @@ bool MonoVideoLoader::scanDirectoryFiles()
 
     auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
 
+    if (mono_param == nullptr)
+    {
+        LOG_ERR("MonoParam is not set in cameraParam.");
+        return false;
+    }
     try
     {
         vp::readDirFiles(mono_param->source, image_files_, true);
@@ -197,7 +165,10 @@ void MonoVideoLoader::prefetchLoop()
 
     auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
     if (!mono_param)
+    {
+        LOG_ERR("MonoParam is not set in cameraParam.");
         return;
+    }
 
     while (prefetch_running_)
     {
@@ -221,9 +192,12 @@ void MonoVideoLoader::prefetchLoop()
             continue;
         }
 
-        std::string file = image_files_[disk_read_index_];
-        std::string full_path = vp::joinDir(mono_param->source, file);
-        std::string name, ext;
+        auto file = image_files_[disk_read_index_];
+        auto full_path = vp::joinDir(mono_param->source, file);
+
+        std::string name{};
+        std::string ext{};
+
         vp::fileNameExt(file, name, ext);
 
         lock.unlock();
@@ -272,7 +246,7 @@ void MonoVideoLoader::prefetchLoop()
             buffer_cv_.notify_one();
         }
 
-        disk_read_index_++;
+        ++disk_read_index_;
     }
 
     LOG_TRA("Prefetch thread stopped.");
@@ -286,8 +260,8 @@ void MonoVideoLoader::stopPrefetch()
 
     {
         std::lock_guard<std::mutex> lock(buffer_mutex_);
+        buffer_cv_.notify_all();
     }
-    buffer_cv_.notify_all();
 
     // 3. Join
     if (prefetch_thread_.joinable())
@@ -295,4 +269,28 @@ void MonoVideoLoader::stopPrefetch()
         prefetch_thread_.join();
     }
 }
+
+std::shared_ptr<domain::model::ImagePacket> MonoVideoLoader::createImagePacket(const cv::Mat &image)
+{
+    auto mono_packet = std::make_shared<domain::model::MonoImagePacket>();
+    auto &frame = mono_packet->frame;
+
+    frame.channels = image.channels();
+    frame.data.assign(image.data, image.data + (image.cols * image.rows * image.channels()));
+    frame.height = image.rows;
+    frame.width = image.cols;
+    frame.step = static_cast<int>(image.step);
+
+    auto image_packet = std::make_shared<domain::model::ImagePacket>(
+        domain::model::ImagePacket{
+            .format = domain::model::ImageFormat::MONO,
+            .encoding = (image.channels() == 1) ? domain::model::ImageEncoding::MONO8 : domain::model::ImageEncoding::BGR8,
+            .frame_id = frame_id_++,
+            .timestamp = getTime64(),
+            .payload = *mono_packet,
+        });
+
+    return image_packet;
+}
+
 } // namespace vp::adapter::in

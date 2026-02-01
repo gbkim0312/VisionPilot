@@ -14,14 +14,17 @@ public:
     MOCK_METHOD(void, onFrameReceived, (const domain::model::ImagePacket &frame), (override));
 };
 
-class VideoLoaderFrameSetTest : public ::testing::Test
+class VideoLoaderFrameSetMonoTest : public ::testing::Test
 {
 protected:
     void SetUp() override
     {
         config_.cameraFormat = config::CameraFormat::MONO;
         config_.fps = 10;
-        config_.cameraParam = config::MonoParam{.source = "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0"};
+        config_.cameraParam = config::MonoParam{
+            .maxImageBufferSize = 50,
+            .colorFormat = config::ColorFormat::GRAYSCALE,
+            .source = "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0"};
         config_.dataType = config::DataType::FRAME_SET;
 
         event_queue_ = std::make_unique<infrastructure::event::EventQueue>();
@@ -43,29 +46,21 @@ protected:
     std::unique_ptr<VideoLoader> loader_;
 };
 
-TEST_F(VideoLoaderFrameSetTest, StartAndStop)
+TEST_F(VideoLoaderFrameSetMonoTest, StartAndStop)
 {
     EXPECT_TRUE(loader_->start());
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_TRUE(loader_->stop());
 }
 
-TEST_F(VideoLoaderFrameSetTest, FrameReceptionWithDisplay)
+TEST_F(VideoLoaderFrameSetMonoTest, FrameReceptionWithDisplay)
 {
     // Mock 객체가 호출될 때 실제 동작(이미지 출력)을 정의
     EXPECT_CALL(mock_receive_port_, onFrameReceived(testing::_))
         .WillRepeatedly(testing::Invoke([](const domain::model::ImagePacket &packet)
                                         {
-        if (packet.payload.index() != 0)
-        {
-            return;
-        } // MonoImagePacket인지 확인
-
         const auto *mono_packet = std::get_if<vp::domain::model::MonoImagePacket>(&packet.payload);
-        if (mono_packet == nullptr)
-        {
-            return;
-        }
+        ASSERT_NE(mono_packet, nullptr);
 
         cv::Mat frame(mono_packet->frame.height,
                       mono_packet->frame.width,

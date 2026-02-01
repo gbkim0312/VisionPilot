@@ -44,5 +44,7 @@ private:
     bool scanDirectoryFiles();
     void prefetchLoop();
     void stopPrefetch();
+
+    std::shared_ptr<domain::model::ImagePacket> createImagePacket(const cv::Mat &image);
 };
 } // namespace vp::adapter::in
