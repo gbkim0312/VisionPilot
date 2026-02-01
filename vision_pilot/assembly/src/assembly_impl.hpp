@@ -5,11 +5,8 @@
 #include "event_router.hpp"
 #include "frame_receive_usecase.hpp"
 #include "in_adapter_registry.hpp"
-#include "localization_port.hpp"
-#include "object_detection_port.hpp"
 #include "out_adapter_registry.hpp"
 #include "vision_pilot_service.hpp"
-#include "visualization_port.hpp"
 #include <memory>
 
 namespace vp::assembly

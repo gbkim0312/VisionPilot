@@ -1,22 +1,21 @@
 {
     "videoLoaderConfig": {
         "dataType": "frameSet",
-        "cameraFormat": "stereo", // [mono|stereo]
+        "cameraFormat": "mono", // [mono|stereo]
         "fps": 10,
         "frameSize": {
             "width": 0, //0: default size
             "height": 0 //0: default size
         },
-        "stereo": {
-            "leftSource": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0",
-            "rightSource": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_1",
-            "maxImageBufferSize": 50,
+        "mono": {
+            "source": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0",
+            "maxImageBufferSize": 100,
             "colorFormat": "grayscale" // [grayscale|color]
         }
     },
     "vslamAdapterConfig": {
-        "method": "stereo", // [monocular|stereo|rgbd|disabled]
-        "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_stereo_00-02.yaml",
+        "method": "monocular", // [monocular|stereo|rgbd|disabled]
+        "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
         "vocabPath": "./etc/orb_vocab.fbow"
     },
     "vslamViewerConfig": {

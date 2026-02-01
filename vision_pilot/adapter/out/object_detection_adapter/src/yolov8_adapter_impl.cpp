@@ -91,9 +91,9 @@ bool YOLOv8AdapterImpl::initialize()
             net_->setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
         }
 
-        // 워밍업 (선택사항: 첫 추론 속도 향상)
-        // cv::Mat dummy = cv::Mat::zeros(config_.inputHeight, config_.inputWidth, CV_32FC3);
-        // cv::dnn::blobFromImage(dummy); // ...
+        // 워밍업
+        cv::Mat dummy = cv::Mat::zeros(config_.inputHeight, config_.inputWidth, CV_32FC3);
+        cv::dnn::blobFromImage(dummy);
 
         LOG_INF("YOLOv8 initialized successfully.");
         is_initialized_ = true;

@@ -41,7 +41,7 @@ void VisionPilotServiceImpl::onFrameReceived(const domain::model::ImagePacket &f
 
     {
         std::lock_guard<std::mutex> lock(data_mutex_);
-        latest_frame_ = frame; // 최신 프레임 덮어쓰기 (큐가 아님! 이전거 버림)
+        latest_frame_ = frame; // 최신 프레임 덮어쓰기
         new_frame_available_ = true;
     }
     detection_cv_.notify_one(); // 자고 있는 탐지기 깨우기

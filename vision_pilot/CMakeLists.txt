@@ -146,7 +146,7 @@ install(TARGETS gtest gtest_main gmock benchmark benchmark_main
 )
 
 # 4. 리소스 파일 설치
-install(FILES res/etc/sample.mp4 res/etc/yolov8n.onnx res/etc/orb_vocab.fbow res/etc/vp_config_stereo.json
+install(FILES res/etc/sample.mp4 res/etc/yolov8n.onnx res/etc/orb_vocab.fbow res/etc/vp_config_stereo.json res/etc/vp_config_mono.json
     DESTINATION etc
     COMPONENT vp_samples
 )
