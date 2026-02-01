@@ -15,7 +15,7 @@ public:
 
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
-    bool stop();
+    bool deinitialize();
 
 private:
     std::unique_ptr<StereoVSlamAdapterImpl> impl_;

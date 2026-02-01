@@ -1,9 +1,9 @@
 #pragma once
 
+#include "detection.hpp"
 #include "image.hpp"
 #include "pose.hpp"
 #include "vslam_config.hpp"
-
 namespace vp::adapter::out
 {
 class OpenCVViewerAdapterImpl
@@ -14,7 +14,7 @@ public:
     bool start();
     bool stop();
 
-    void render(const domain::model::Pose &pose, const domain::model::ImagePacket &frame);
+    void render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame);
 
 private:
     const config::VslamViewerConfig config_;

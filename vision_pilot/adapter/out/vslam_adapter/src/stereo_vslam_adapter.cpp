@@ -23,7 +23,7 @@ domain::model::Pose StereoVSlamAdapter::update(const domain::model::ImagePacket 
     return impl_->update(image, timestamp);
 }
 
-bool StereoVSlamAdapter::stop()
+bool StereoVSlamAdapter::deinitialize()
 {
     return impl_->stop();
 }

@@ -7,13 +7,15 @@ namespace vp::config
 enum class VslamMethod
 {
     ORB_SLAM3 = 0,
-    STELLA_VSLAM
+    STELLA_VSLAM = 1,
+    DISABLED = -1
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
                              {
                                  {VslamMethod::ORB_SLAM3, "orbSlam3"},
                                  {VslamMethod::STELLA_VSLAM, "stellaVslam"},
+                                 {VslamMethod::DISABLED, "disabled"},
                              })
 
 struct VslamAdapterConfig

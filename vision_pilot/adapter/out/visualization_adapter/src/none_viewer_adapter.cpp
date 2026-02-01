@@ -1,4 +1,5 @@
 #include "none_viewer_adapter.hpp"
+#include "detection.hpp"
 #include "gaia_log.hpp"
 #include <gaia_exception.hpp>
 
@@ -28,7 +29,7 @@ bool NoneViewerAdapter::stop()
     LOG_TRA("");
     return true;
 }
-void NoneViewerAdapter::render(const domain::model::Pose & /* pose */, const domain::model::ImagePacket & /* frame */)
+void NoneViewerAdapter::render(const domain::model::Pose & /* pose */, std::vector<domain::model::Detection> /* detections */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("");
     return;

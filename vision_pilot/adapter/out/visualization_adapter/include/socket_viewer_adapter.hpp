@@ -16,7 +16,7 @@ public:
     bool start();
     bool stop();
 
-    void render(const domain::model::Pose &pose, const domain::model::ImagePacket &frame) override;
+    void render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame) override;
 
 private:
     std::unique_ptr<SocketViewerAdapterImpl> impl_;

@@ -1,2 +1,3 @@
 add_subdirectory(vslam_adapter)
 add_subdirectory(visualization_adapter)
+add_subdirectory(object_detection_adapter)

@@ -26,7 +26,7 @@ domain::model::Pose MonoVSlamAdapter::update(const domain::model::ImagePacket &i
     return impl_->update(image, timestamp);
 }
 
-bool MonoVSlamAdapter::stop()
+bool MonoVSlamAdapter::deinitialize()
 {
     return impl_->stop();
 }

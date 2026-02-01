@@ -3,6 +3,7 @@
 #include "stereo_vslam_adapter.hpp"
 #include "vision_pilot_service.hpp"
 #include "vslam_config.hpp"
+#include "yolov8_adapter.hpp"
 #include <gtest/gtest.h>
 #include <memory>
 #include <opencv2/opencv.hpp>
@@ -24,6 +25,15 @@ protected:
         vslam_config_.method = config::VslamMethod::STELLA_VSLAM;
         vslam_config_.vslamConfigFilePath = vp::joinDir(stella_config_dir, "KITTI_stereo_00-02.yaml");
 
+        // 3. YOLOv8 Adapter 설정 채우기
+        std::string model_path = vp::joinDir(project_root, "vision_pilot/res/etc/yolov8n.onnx");
+        yolo_config_.modelPath = model_path;
+        yolo_config_.confThreshold = 0.25f;
+        yolo_config_.nmsThreshold = 0.45f;
+        yolo_config_.inputWidth = 640;
+        yolo_config_.inputHeight = 640;
+        yolo_config_.useCuda = false;
+
         // 빌드 환경에 따른 보캐뷸러리 경로
         vslam_config_.vocabPath = vp::joinDir(project_root, "vision_pilot/res/orb_vocab.fbow");
 
@@ -33,10 +43,9 @@ protected:
         // 포트 초기화
         localization_adapter_ = std::make_unique<adapter::out::StereoVSlamAdapter>(vslam_config_);
         visualization_adapter_ = std::make_unique<adapter::out::OpenCVViewerAdapter>(vslam_viewer_config_);
-        // localization_adapter_->initialize();
+        object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(yolo_config_);
 
-        // VisionPilotService 초기화
-        vision_pilot_service_ = std::make_unique<VisionPilotService>(*localization_adapter_, *visualization_adapter_);
+        vision_pilot_service_ = std::make_unique<VisionPilotService>(*localization_adapter_, *visualization_adapter_, *object_detection_adapter_);
 
         //  유틸리티를 사용한 이미지 파일 목록 읽기
         std::string image0_dir = vp::joinDir(kitti_base, "image_0");
@@ -75,8 +84,8 @@ protected:
     {
         localization_adapter_.reset();
         visualization_adapter_.reset();
+        object_detection_adapter_.reset();
         vision_pilot_service_.reset();
-        // 정리 코드
     }
 
     domain::model::ImagePacket createPacket(const cv::Mat &left, const cv::Mat &right, uint64_t frame_id, uint64_t ts)
@@ -109,6 +118,7 @@ protected:
 
     config::VslamAdapterConfig vslam_config_;
     config::VslamViewerConfig vslam_viewer_config_;
+    config::YoloConfig yolo_config_;
 
     std::vector<std::string> image0_filenames_;
     std::vector<std::string> image1_filenames_;
@@ -118,6 +128,7 @@ protected:
 
     std::unique_ptr<adapter::out::StereoVSlamAdapter> localization_adapter_ = nullptr;
     std::unique_ptr<adapter::out::OpenCVViewerAdapter> visualization_adapter_ = nullptr;
+    std::unique_ptr<adapter::out::YOLOv8Adapter> object_detection_adapter_ = nullptr;
 
     std::unique_ptr<VisionPilotService> vision_pilot_service_ = nullptr;
 };
@@ -130,18 +141,25 @@ TEST_F(VisionPilotServiceStereoTest, InitializationTest)
 TEST_F(VisionPilotServiceStereoTest, RunServiceTest)
 {
     localization_adapter_->initialize();
+    object_detection_adapter_->initialize();
     visualization_adapter_->start();
 
-    int test_frame_count = image0_full_paths_.size();
+    constexpr size_t expected_count = 100;
+    int test_frame_count = std::min(image0_full_paths_.size(), expected_count);
+
+    auto interval = std::chrono::milliseconds(100);
+    auto next_frame_time = std::chrono::steady_clock::now();
 
     for (int i = 0; i < test_frame_count; ++i)
     {
+        next_frame_time += interval;
+
         cv::Mat left_img = cv::imread(image0_full_paths_[i], cv::IMREAD_GRAYSCALE);  // NOLINT: OPENCV
         cv::Mat right_img = cv::imread(image1_full_paths_[i], cv::IMREAD_GRAYSCALE); // NOLINT: OPENCV
         auto packet = createPacket(left_img, right_img, i, timestamps_[i]);
         vision_pilot_service_->onFrameReceived(packet);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_until(next_frame_time);
     }
 }
 } // namespace vp::service

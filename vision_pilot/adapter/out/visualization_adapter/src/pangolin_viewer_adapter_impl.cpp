@@ -25,7 +25,7 @@ bool PangolinViewerAdapterImpl::stop()
     LOG_TRA("Stopping Pangolin Viewer...");
     return true;
 }
-void PangolinViewerAdapterImpl::render(const domain::model::Pose &pose, const domain::model::ImagePacket & /* frame */)
+void PangolinViewerAdapterImpl::render(const domain::model::Pose & /* pose */, std::vector<domain::model::Detection> /* detections */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("Rendering frame in Pangolin Viewer...");
 }

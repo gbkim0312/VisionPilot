@@ -26,7 +26,7 @@ bool SocketViewerAdapterImpl::stop()
     return true;
 }
 
-void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, const domain::model::ImagePacket & /* frame */)
+void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, std::vector<domain::model::Detection> /* detections */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("");
 }
