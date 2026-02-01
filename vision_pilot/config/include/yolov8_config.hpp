@@ -1,6 +1,6 @@
 #pragma once
+#include "nlohmann/json.hpp"
 #include <string>
-
 namespace vp::config
 {
 struct YoloConfig
@@ -12,4 +12,13 @@ struct YoloConfig
     int inputHeight = 640;
     bool useCuda = false; // GPU 사용 여부
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(YoloConfig,
+                                   modelPath,
+                                   confThreshold,
+                                   nmsThreshold,
+                                   inputWidth,
+                                   inputHeight,
+                                   useCuda)
+
 } // namespace vp::config

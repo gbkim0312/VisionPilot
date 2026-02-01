@@ -1,15 +1,11 @@
 #include "event_router.hpp"
 #include "video_loader.hpp"
-#include "video_loader_config.hpp"
 #include "video_loader_factory.hpp"
-#include "gmock/gmock.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
-#include <variant>
 
-namespace vp::adapter::in::frame_loader
+namespace vp::adapter::in
 {
 
 class MockFrameReceivePort : public vp::port::in::FrameReceiveUseCase
@@ -18,15 +14,15 @@ public:
     MOCK_METHOD(void, onFrameReceived, (const domain::model::ImagePacket &frame), (override));
 };
 
-class VideoLoaderTest : public ::testing::Test
+class VideoLoaderFrameSetTest : public ::testing::Test
 {
 protected:
     void SetUp() override
     {
         config_.cameraFormat = config::CameraFormat::MONO;
-        config_.fps = 30;
-        config_.cameraParam = config::MonoParam{.source = "etc/sample.mp4"};
-        config_.dataType = config::DataType::VIDEO_FILE;
+        config_.fps = 10;
+        config_.cameraParam = config::MonoParam{.source = "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0"};
+        config_.dataType = config::DataType::FRAME_SET;
 
         event_queue_ = std::make_unique<infrastructure::event::EventQueue>();
         event_router_ = std::make_unique<infrastructure::event::EventRouter>(*event_queue_, mock_receive_port_);
@@ -47,22 +43,14 @@ protected:
     std::unique_ptr<VideoLoader> loader_;
 };
 
-TEST_F(VideoLoaderTest, StartAndStop)
+TEST_F(VideoLoaderFrameSetTest, StartAndStop)
 {
     EXPECT_TRUE(loader_->start());
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_TRUE(loader_->stop());
 }
 
-TEST_F(VideoLoaderTest, FrameReception)
-{
-    EXPECT_CALL(mock_receive_port_, onFrameReceived(testing::_)).Times(testing::AtLeast(1));
-    EXPECT_TRUE(loader_->start());
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    EXPECT_TRUE(loader_->stop());
-}
-
-TEST_F(VideoLoaderTest, FrameReceptionWithDisplay)
+TEST_F(VideoLoaderFrameSetTest, FrameReceptionWithDisplay)
 {
     // Mock 객체가 호출될 때 실제 동작(이미지 출력)을 정의
     EXPECT_CALL(mock_receive_port_, onFrameReceived(testing::_))
@@ -93,9 +81,9 @@ TEST_F(VideoLoaderTest, FrameReceptionWithDisplay)
     EXPECT_TRUE(loader_->start());
 
     // 영상이 나오는 것을 확인하기 위해 충분한 시간 대기
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
     EXPECT_TRUE(loader_->stop());
     cv::destroyAllWindows();
 }
-} // namespace vp::adapter::in::frame_loader
+}; // namespace vp::adapter::in

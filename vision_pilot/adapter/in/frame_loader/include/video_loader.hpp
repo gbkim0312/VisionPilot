@@ -1,27 +1,40 @@
 #pragma once
+#include "event_queue.hpp"
+#include "image.hpp"
 #include "video_loader_config.hpp"
+#include <atomic>
 #include <memory>
+#include <thread>
 
-namespace vp::infrastructure::event
+namespace vp::adapter::in
 {
-class EventQueue;
-} // namespace vp::infrastructure::event
-
-namespace vp::adapter::in::frame_loader
-{
-class VideoLoaderImpl;
 
 class VideoLoader
 {
 public:
-    // 포트 대신 큐를 참조로 받음
     VideoLoader(const config::VideoLoaderConfig &config, infrastructure::event::EventQueue &event_queue);
     ~VideoLoader();
 
     bool start();
     bool stop();
 
-private:
-    std::unique_ptr<VideoLoaderImpl> impl_;
+protected:
+    virtual bool initialize() = 0;
+    virtual bool fetchFrame() = 0;
+    virtual void release() = 0;
+
+    void pushToQueue(std::shared_ptr<domain::model::ImagePacket> frame_packet);
+    void runLoop();
+
+    void loadFramesFromFile();
+    void loadFramesFromCameraDevice();
+
+protected:
+    const config::VideoLoaderConfig &config_;
+    infrastructure::event::EventQueue &event_queue_;
+
+    std::atomic_bool running_ = false;
+    std::thread worker_thread_;
+    uint64_t frame_id_ = 0;
 };
-} // namespace vp::adapter::in::frame_loader
+} // namespace vp::adapter::in

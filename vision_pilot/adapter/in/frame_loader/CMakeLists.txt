@@ -3,8 +3,8 @@ project(vp_frame_loader)
 set(_INCLUDE_PUBLIC include)
 set(_INCLUDE_PRIVATE src)
 
-set(_LINK_PUBLIC_LIBRARIES vp::config)
-set(_LINK_PRIVATE_LIBRARIES gaia::gaia vp::model vp::port_in vp::event
+set(_LINK_PUBLIC_LIBRARIES vp::config vp::event)
+set(_LINK_PRIVATE_LIBRARIES gaia::gaia vp::model vp::port_in
     opencv_core
     opencv_imgproc
     opencv_imgcodecs
