@@ -6,7 +6,7 @@
 namespace vp::assembly
 {
 
-class AssemplyImpl;
+class AssemblyImpl;
 
 class Assembly
 {
@@ -18,6 +18,6 @@ public:
     void stopService();
 
 private:
-    std::unique_ptr<AssemplyImpl> impl_;
+    std::unique_ptr<AssemblyImpl> impl_;
 };
 } // namespace vp::assembly

@@ -13,11 +13,26 @@ bool ConfigLoader::loadConfig(const std::string &config_path)
     return true;
 }
 
+bool ConfigLoader::isLoaded() const
+{
+    LOG_TRA("");
+
+    return is_loaded_;
+}
+
+const AssemblyConfig &ConfigLoader::getAssemblyConfig() const
+{
+    LOG_TRA("");
+
+    return assembly_config_;
+}
+
 void ConfigLoader::loadConfigFromFile(const std::string &config_path)
 {
     LOG_TRA("");
 
     assembly_config_ = jsonFileToStruct<config::AssemblyConfig>(config_path);
+    is_loaded_ = true;
 }
 
 } // namespace vp::config
