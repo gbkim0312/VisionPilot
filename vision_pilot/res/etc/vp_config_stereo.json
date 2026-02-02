@@ -15,6 +15,7 @@
         }
     },
     "vslamAdapterConfig": {
+        "type": "stellaVslam", // [stellaVslam|orbSlam3|none]
         "method": "stereo", // [monocular|stereo|rgbd|disabled]
         "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_stereo_00-02.yaml",
         "vocabPath": "./etc/orb_vocab.fbow",

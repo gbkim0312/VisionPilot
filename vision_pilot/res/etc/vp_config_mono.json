@@ -14,6 +14,7 @@
         }
     },
     "vslamAdapterConfig": {
+        "type": "stellaVslam", // [stellaVslam|orbSlam3|none]
         "method": "monocular", // [monocular|stereo|rgbd|disabled]
         "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
         "vocabPath": "./etc/orb_vocab.fbow",
@@ -43,7 +44,7 @@
     },
     "detectionConfig": {
         "type": "yolov8", // [yolov8|disabled]
-        "yoloConfig": {
+        "yolov8": {
             "modelPath": "./etc/yolov8n.onnx",
             "confThreshold": 0.25,
             "nmsThreshold": 0.45,

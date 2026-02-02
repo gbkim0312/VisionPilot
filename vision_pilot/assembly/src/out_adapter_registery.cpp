@@ -152,6 +152,8 @@ vp::port::out::LocalizationPort &OutAdapterRegistry::getLocalizationPort()
     {
     case config::VslamType::STELLA_VSLAM:
         return *stella_vslam_adapter_;
+    case config::VslamType::NONE:
+        return *no_vslam_adapter_;
     default:
         THROWLOG(SysException, "Unsupported VSLAM method. Cannot provide LocalizationPort.");
     }
