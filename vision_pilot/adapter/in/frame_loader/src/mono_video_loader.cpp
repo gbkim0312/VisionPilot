@@ -12,14 +12,15 @@ namespace vp::adapter::in
 MonoVideoLoader::~MonoVideoLoader()
 {
     LOG_TRA("");
-    this->stopPrefetch();
+
+    this->releaseImpl();
 }
 
 bool MonoVideoLoader::initialize()
 {
     LOG_TRA("");
 
-    auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
+    const auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
     if (mono_param == nullptr)
     {
         LOG_ERR("MonoParam is not set in cameraParam.");
@@ -55,12 +56,7 @@ void MonoVideoLoader::release()
 {
     LOG_TRA("");
 
-    this->stopPrefetch();
-
-    if (video_capture_.isOpened())
-    {
-        video_capture_.release();
-    }
+    this->releaseImpl();
 }
 
 bool MonoVideoLoader::fetchFrame()
@@ -77,6 +73,19 @@ bool MonoVideoLoader::fetchFrame()
         LOG_ERR("Unsupported DataType: {}", config::toString(config_.dataType));
         return false;
     }
+}
+
+bool MonoVideoLoader::releaseImpl()
+{
+    LOG_TRA("");
+
+    this->stopPrefetch();
+
+    if (video_capture_.isOpened())
+    {
+        video_capture_.release();
+    }
+    return true;
 }
 
 bool MonoVideoLoader::fetchFrameFromVideo()
@@ -132,7 +141,7 @@ bool MonoVideoLoader::scanDirectoryFiles()
     disk_read_index_ = 0;
     is_eof_ = false;
 
-    auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
+    const auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
 
     if (mono_param == nullptr)
     {
@@ -163,8 +172,8 @@ void MonoVideoLoader::prefetchLoop()
 {
     LOG_TRA("Prefetch thread started.");
 
-    auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
-    if (!mono_param)
+    const auto *mono_param = std::get_if<config::MonoParam>(&config_.cameraParam);
+    if (mono_param == nullptr)
     {
         LOG_ERR("MonoParam is not set in cameraParam.");
         return;
@@ -276,7 +285,7 @@ std::shared_ptr<domain::model::ImagePacket> MonoVideoLoader::createImagePacket(c
     auto &frame = mono_packet->frame;
 
     frame.channels = image.channels();
-    frame.data.assign(image.data, image.data + (image.cols * image.rows * image.channels()));
+    frame.data.assign(image.data, image.data + (image.cols * image.rows * image.channels())); // NOLINT: OPNECV
     frame.height = image.rows;
     frame.width = image.cols;
     frame.step = static_cast<int>(image.step);

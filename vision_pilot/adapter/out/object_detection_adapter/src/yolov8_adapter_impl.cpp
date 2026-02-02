@@ -32,7 +32,7 @@ cv::Mat resizeImage(const cv::Mat &input_img, int target_width)
     int original_height = input_img.rows;
 
     float scale = static_cast<float>(target_width) / static_cast<float>(original_width);
-    int new_height = static_cast<int>(original_height * scale);
+    int new_height = static_cast<int>(static_cast<float>(original_height) * scale);
 
     cv::Mat resized_img;
     cv::resize(input_img, resized_img, cv::Size(target_width, new_height));
@@ -119,7 +119,7 @@ bool YOLOv8AdapterImpl::deinitialize()
     return true;
 }
 
-std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &packet)
+std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &image)
 {
     if (!is_initialized_ || net_ == nullptr || net_->empty())
     {
@@ -139,9 +139,9 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
         else if constexpr (std::is_same_v<T, vp::domain::model::StereoImagePacket>)
         {
             raw_ptr = &arg.left;
-        } }, packet.payload);
+        } }, image.payload);
 
-    if (!raw_ptr || raw_ptr->data.empty())
+    if (raw_ptr == nullptr || raw_ptr->data.empty())
     {
         return {};
     }
@@ -152,11 +152,11 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
 
     // RGB 변환
     cv::Mat rgb_frame;
-    if (packet.encoding == vp::domain::model::ImageEncoding::BGR8)
+    if (image.encoding == vp::domain::model::ImageEncoding::BGR8)
     {
         cv::cvtColor(frame, rgb_frame, cv::COLOR_BGR2RGB);
     }
-    else if (packet.encoding == vp::domain::model::ImageEncoding::MONO8)
+    else if (image.encoding == vp::domain::model::ImageEncoding::MONO8)
     {
         cv::cvtColor(frame, rgb_frame, cv::COLOR_GRAY2RGB);
     }
@@ -172,10 +172,10 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     int target_h = config_.inputHeight;
 
     // 스케일 계산
-    float scale = std::min((float)target_w / img_w, (float)target_h / img_h);
+    float scale = std::min(static_cast<float>(target_w) / static_cast<float>(img_w), static_cast<float>(target_h) / static_cast<float>(img_h));
 
-    int new_w = std::round(img_w * scale);
-    int new_h = std::round(img_h * scale);
+    auto new_w = static_cast<int>(std::round(static_cast<float>(img_w) * scale));
+    auto new_h = static_cast<int>(std::round(static_cast<float>(img_h) * scale));
 
     // 리사이즈 수행
     cv::Mat resized_img;
@@ -207,7 +207,6 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     // YOLOv8 Output: [Batch, 4+Classes, Anchors] -> [1, 84, 8400]
     int dimensions = output.size[1];
     int rows = output.size[2];
-    float *pdata = (float *)output.data;
 
     std::vector<int> class_ids;
     std::vector<float> confidences;
@@ -215,13 +214,13 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
 
     for (int r = 0; r < rows; ++r)
     {
-        float max_conf = 0.f;
+        float max_conf = 0.;
         int max_class_id = -1;
 
         // Class Score 파싱
         for (int c = 4; c < dimensions; ++c)
         {
-            float score = pdata[c * rows + r];
+            float score = output.at<float>(0, c, r);
             if (score > max_conf)
             {
                 max_conf = score;
@@ -232,17 +231,17 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
         if (max_conf >= config_.confThreshold)
         {
             // 예측 좌표 (640x640 Letterbox 기준)
-            float cx = pdata[0 * rows + r];
-            float cy = pdata[1 * rows + r];
-            float w = pdata[2 * rows + r];
-            float h = pdata[3 * rows + r];
+            float cx = output.at<float>(0, 0, r);
+            float cy = output.at<float>(0, 1, r);
+            float w = output.at<float>(0, 2, r);
+            float h = output.at<float>(0, 3, r);
 
             // =========================================================
             // 좌표 복원 (Coordinate Restoration)
             // =========================================================
             // 1. 패딩 제거 (Letterbox 좌표 -> 리사이즈 이미지 좌표)
-            float original_cx = (cx - dw);
-            float original_cy = (cy - dh);
+            float original_cx = (cx - static_cast<float>(dw));
+            float original_cy = (cy - static_cast<float>(dh));
 
             // 2. 스케일 역변환 (리사이즈 이미지 좌표 -> 원본 이미지 좌표)
             original_cx /= scale;
@@ -251,8 +250,8 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
             float original_h = h / scale;
 
             // 3. Top-Left 변환
-            int left = static_cast<int>(original_cx - 0.5f * original_w);
-            int top = static_cast<int>(original_cy - 0.5f * original_h);
+            int left = static_cast<int>(original_cx - 0.5F * original_w);
+            int top = static_cast<int>(original_cy - 0.5F * original_h);
             int width = static_cast<int>(original_w);
             int height = static_cast<int>(original_h);
 

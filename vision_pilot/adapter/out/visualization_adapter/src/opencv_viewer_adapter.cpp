@@ -23,7 +23,7 @@ bool OpenCVViewerAdapter::stop()
     return impl_->stop();
 }
 
-void OpenCVViewerAdapter::render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame)
+void OpenCVViewerAdapter::render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame)
 {
     impl_->render(pose, detections, frame);
 }

@@ -17,13 +17,12 @@ protected:
     {
         const std::string project_root = "/home/gbkim/project/VisionPilot";
         const std::string kitti_base = vp::joinDir(project_root, "vision_pilot/res/dataset/kitti/dataset/sequences/00");
-        const std::string stella_config_dir = vp::joinDir(project_root, "thirdparty/stella_vslam/example/kitti");
 
         vslam_config_.method = config::VslamMethod::DISABLED;
 
         yolo_config_.modelPath = "/home/gbkim/project/VisionPilot/vision_pilot/res/etc/yolov8n.onnx";
-        yolo_config_.confThreshold = 0.25f;
-        yolo_config_.nmsThreshold = 0.45f;
+        yolo_config_.confThreshold = 0.25F;
+        yolo_config_.nmsThreshold = 0.45F;
         yolo_config_.inputWidth = 640;
         yolo_config_.inputHeight = 640;
         yolo_config_.useCuda = false;
@@ -114,7 +113,7 @@ TEST_F(VPServiceDetectionTest, RunServiceTest)
     visualization_adapter_->start();
 
     constexpr size_t expected_count = 100;
-    int test_frame_count = std::min(image_full_paths_.size(), expected_count);
+    size_t test_frame_count = std::min(image_full_paths_.size(), expected_count);
 
     // 목표 주기 설정 (예: 100ms = 10Hz)
     auto interval = std::chrono::milliseconds(100);
@@ -122,7 +121,7 @@ TEST_F(VPServiceDetectionTest, RunServiceTest)
     // 시작 시간 기준점 잡기
     auto next_frame_time = std::chrono::steady_clock::now();
 
-    for (int i = 0; i < test_frame_count; ++i)
+    for (size_t i = 0; i < test_frame_count; ++i)
     {
         // 다음 실행 예정 시간 계산 (현재 기준점 + 주기)
         next_frame_time += interval;

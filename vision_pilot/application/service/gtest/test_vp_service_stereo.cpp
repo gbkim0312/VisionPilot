@@ -28,8 +28,8 @@ protected:
         // 3. YOLOv8 Adapter 설정 채우기
         std::string model_path = vp::joinDir(project_root, "vision_pilot/res/etc/yolov8n.onnx");
         yolo_config_.modelPath = model_path;
-        yolo_config_.confThreshold = 0.25f;
-        yolo_config_.nmsThreshold = 0.45f;
+        yolo_config_.confThreshold = 0.25F;
+        yolo_config_.nmsThreshold = 0.45F;
         yolo_config_.inputWidth = 640;
         yolo_config_.inputHeight = 640;
         yolo_config_.useCuda = false;
@@ -145,12 +145,12 @@ TEST_F(VisionPilotServiceStereoTest, RunServiceTest)
     visualization_adapter_->start();
 
     constexpr size_t expected_count = 100;
-    int test_frame_count = std::min(image0_full_paths_.size(), expected_count);
+    size_t test_frame_count = std::min(image0_full_paths_.size(), expected_count);
 
     auto interval = std::chrono::milliseconds(100);
     auto next_frame_time = std::chrono::steady_clock::now();
 
-    for (int i = 0; i < test_frame_count; ++i)
+    for (size_t i = 0; i < test_frame_count; ++i)
     {
         next_frame_time += interval;
 

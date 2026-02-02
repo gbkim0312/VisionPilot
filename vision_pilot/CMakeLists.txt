@@ -102,12 +102,11 @@ FetchContent_MakeAvailable(googlebenchmark)
 
 # --- 하위 디렉토리 추가 ---
 add_subdirectory(gaia)
-add_subdirectory(config)
-add_subdirectory(infrastructure)
-add_subdirectory(adapter)
-add_subdirectory(application)
-add_subdirectory(assembly)
-
+add_subdirectory_with_static_analysis(config)
+add_subdirectory_with_static_analysis(infrastructure)
+add_subdirectory_with_static_analysis(adapter)
+add_subdirectory_with_static_analysis(application)
+add_subdirectory_with_static_analysis(assembly)
 # --- 타겟 생성 및 링크 ---
 add_executable(${PROJECT_NAME} main.cpp)
 

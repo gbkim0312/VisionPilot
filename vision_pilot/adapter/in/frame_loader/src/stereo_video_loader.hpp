@@ -45,6 +45,8 @@ private:
     std::atomic_bool prefetch_running_{false};
     bool is_eof_ = false; // 모든 파일을 다 읽었는지 여부
 
+    bool releaseImpl();
+
     bool fetchFrameFromVideo();
     bool fetchFrameFromFrameSet();
 

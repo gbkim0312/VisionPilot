@@ -13,9 +13,9 @@ class PangolinViewerAdapterImpl
 public:
     explicit PangolinViewerAdapterImpl(const config::VslamViewerConfig &config);
     ~PangolinViewerAdapterImpl();
-    bool start();
-    bool stop();
-    void render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame);
+    bool start() const;
+    bool stop() const;
+    void render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame);
 
 private:
     config::VslamViewerConfig config_;

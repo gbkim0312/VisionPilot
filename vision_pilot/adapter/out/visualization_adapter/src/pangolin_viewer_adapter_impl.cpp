@@ -16,7 +16,7 @@ PangolinViewerAdapterImpl::~PangolinViewerAdapterImpl()
     LOG_TRA("");
 }
 
-bool PangolinViewerAdapterImpl::start()
+bool PangolinViewerAdapterImpl::start() const
 {
     LOG_TRA("Starting Pangolin Viewer...");
     if (config_.viewerType != config::VslamViewerType::PANGOLIN)
@@ -25,12 +25,12 @@ bool PangolinViewerAdapterImpl::start()
     }
     return true;
 }
-bool PangolinViewerAdapterImpl::stop()
+bool PangolinViewerAdapterImpl::stop() const
 {
     LOG_TRA("Stopping Pangolin Viewer...");
     return true;
 }
-void PangolinViewerAdapterImpl::render(const domain::model::Pose & /* pose */, std::vector<domain::model::Detection> /* detections */, const domain::model::ImagePacket & /* frame */)
+void PangolinViewerAdapterImpl::render(const domain::model::Pose & /* pose */, const std::vector<domain::model::Detection> & /* detections */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("Rendering frame in Pangolin Viewer...");
 }

@@ -25,7 +25,7 @@ bool SocketViewerAdapter::stop()
     return impl_->stop();
 }
 
-void SocketViewerAdapter::render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame)
+void SocketViewerAdapter::render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame)
 {
     impl_->render(pose, detections, frame);
 }

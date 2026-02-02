@@ -14,8 +14,8 @@ protected:
         const std::string project_root = "/home/gbkim/project/VisionPilot";
         const std::string model_path = vp::joinDir(project_root, "vision_pilot/res/etc/yolov8n.onnx");
         config_.modelPath = model_path;
-        config_.confThreshold = 0.25f;
-        config_.nmsThreshold = 0.45f;
+        config_.confThreshold = 0.25F;
+        config_.nmsThreshold = 0.45F;
         config_.inputWidth = 640;
         config_.inputHeight = 640;
         config_.useCuda = false;
@@ -56,7 +56,7 @@ TEST_F(YOLOv8AdapterTest, ShouldDetectObjectsInSampleImage)
     payload.frame.width = img.cols;
     payload.frame.height = img.rows;
     payload.frame.step = static_cast<int>(img.step);
-    payload.frame.data.assign(img.data, img.data + (img.total() * img.elemSize()));
+    payload.frame.data.assign(img.data, img.data + (img.total() * img.elemSize())); // NOLINT
     image_packet.payload = payload;
 
     auto detections = adapter_->detectObject(image_packet);

@@ -13,14 +13,14 @@ StereoVideoLoader::~StereoVideoLoader()
 {
     LOG_TRA("");
 
-    this->stopPrefetch();
+    this->releaseImpl();
 }
 
 bool StereoVideoLoader::initialize()
 {
     LOG_TRA("");
 
-    auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
+    const auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
     if (stereo_param == nullptr)
     {
         LOG_ERR("StereoParam is not set in cameraParam.");
@@ -62,18 +62,7 @@ bool StereoVideoLoader::initialize()
 void StereoVideoLoader::release()
 {
     LOG_TRA("");
-
-    this->stopPrefetch();
-
-    if (left_video_capture_.isOpened())
-    {
-        left_video_capture_.release();
-    }
-
-    if (right_video_capture_.isOpened())
-    {
-        right_video_capture_.release();
-    }
+    this->releaseImpl();
 }
 
 bool StereoVideoLoader::fetchFrame()
@@ -90,6 +79,24 @@ bool StereoVideoLoader::fetchFrame()
         LOG_ERR("Unsupported DataType: {}", config::toString(config_.dataType));
         return false;
     }
+}
+
+bool StereoVideoLoader::releaseImpl()
+{
+    LOG_TRA("");
+
+    this->stopPrefetch();
+
+    if (left_video_capture_.isOpened())
+    {
+        left_video_capture_.release();
+    }
+
+    if (right_video_capture_.isOpened())
+    {
+        right_video_capture_.release();
+    }
+    return true;
 }
 
 bool StereoVideoLoader::fetchFrameFromVideo()
@@ -156,7 +163,7 @@ bool StereoVideoLoader::scanDirectoryFiles()
     disk_read_index_ = 0;
     is_eof_ = false;
 
-    auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
+    const auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
     if (stereo_param == nullptr)
     {
         return false;
@@ -192,8 +199,8 @@ void StereoVideoLoader::prefetchLoop()
 {
     LOG_TRA("Prefetch thread started.");
 
-    auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
-    if (!stereo_param)
+    const auto *stereo_param = std::get_if<config::StereoParam>(&config_.cameraParam);
+    if (stereo_param == nullptr)
     {
         LOG_ERR("StereoParam is not set in cameraParam.");
         return;
@@ -276,11 +283,7 @@ void StereoVideoLoader::prefetchLoop()
                 break;
             }
 
-            if (!right_image.empty())
-            {
-                load_success = load_success && true;
-            }
-            else
+            if (right_image.empty())
             {
                 LOG_WRN("Failed to load right image: {}", right_file_full_path);
                 load_success = false;
@@ -334,14 +337,14 @@ std::shared_ptr<domain::model::ImagePacket> StereoVideoLoader::createImagePacket
 
     auto &left_frame = stereo_packet->left;
     left_frame.channels = left_image.channels();
-    left_frame.data.assign(left_image.data, left_image.data + (left_image.cols * left_image.rows * left_image.channels()));
+    left_frame.data.assign(left_image.data, left_image.data + (left_image.cols * left_image.rows * left_image.channels())); // NOLINT: OPNECV
     left_frame.height = left_image.rows;
     left_frame.width = left_image.cols;
     left_frame.step = static_cast<int>(left_image.step);
 
     auto &right_frame = stereo_packet->right;
     right_frame.channels = right_image.channels();
-    right_frame.data.assign(right_image.data, right_image.data + (right_image.cols * right_image.rows * right_image.channels()));
+    right_frame.data.assign(right_image.data, right_image.data + (right_image.cols * right_image.rows * right_image.channels())); // NOLINT: OPNECV
     right_frame.height = right_image.rows;
     right_frame.width = right_image.cols;
     right_frame.step = static_cast<int>(right_image.step);

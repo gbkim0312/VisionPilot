@@ -15,7 +15,7 @@ SocketViewerAdapterImpl::~SocketViewerAdapterImpl()
     LOG_TRA("");
 }
 
-bool SocketViewerAdapterImpl::start()
+bool SocketViewerAdapterImpl::start() const
 {
     LOG_TRA("");
 
@@ -26,13 +26,13 @@ bool SocketViewerAdapterImpl::start()
     return true;
 }
 
-bool SocketViewerAdapterImpl::stop()
+bool SocketViewerAdapterImpl::stop() const
 {
     LOG_TRA("");
     return true;
 }
 
-void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, std::vector<domain::model::Detection> /* detections */, const domain::model::ImagePacket & /* frame */)
+void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, const std::vector<domain::model::Detection> & /* detections */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("");
 }

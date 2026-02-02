@@ -57,11 +57,10 @@ bool VideoLoader::stop()
         worker_thread_.join();
     }
 
-    this->release();
     return true;
 }
 
-void VideoLoader::pushToQueue(std::shared_ptr<domain::model::ImagePacket> frame_packet)
+void VideoLoader::pushToQueue(const std::shared_ptr<domain::model::ImagePacket> &frame_packet)
 {
     domain::model::Event evt;
     evt.type = domain::model::EventType::IMAGE;

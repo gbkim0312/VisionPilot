@@ -10,10 +10,10 @@ public:
     SocketViewerAdapterImpl(const config::VslamViewerConfig &config);
     ~SocketViewerAdapterImpl();
 
-    bool start();
-    bool stop();
+    bool start() const;
+    bool stop() const;
 
-    void render(const domain::model::Pose &pose, std::vector<domain::model::Detection> detections, const domain::model::ImagePacket &frame);
+    void render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame);
 
 private:
     const config::VslamViewerConfig &config_;

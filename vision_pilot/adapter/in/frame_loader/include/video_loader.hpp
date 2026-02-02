@@ -13,7 +13,7 @@ class VideoLoader
 {
 public:
     VideoLoader(const config::VideoLoaderConfig &config, infrastructure::event::EventQueue &event_queue);
-    ~VideoLoader();
+    virtual ~VideoLoader();
 
     bool start();
     bool stop();
@@ -23,7 +23,7 @@ protected:
     virtual bool fetchFrame() = 0;
     virtual void release() = 0;
 
-    void pushToQueue(std::shared_ptr<domain::model::ImagePacket> frame_packet);
+    void pushToQueue(const std::shared_ptr<domain::model::ImagePacket> &frame_packet);
     void runLoop();
 
     void loadFramesFromFile();
