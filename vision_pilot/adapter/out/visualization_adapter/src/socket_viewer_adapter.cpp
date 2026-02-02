@@ -1,13 +1,19 @@
 #include "socket_viewer_adapter.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "socket_viewer_adapter_impl.hpp"
 
 namespace vp::adapter::out
 {
 SocketViewerAdapter::SocketViewerAdapter(const config::VslamViewerConfig &config)
-    : impl_(std::make_unique<SocketViewerAdapterImpl>(config))
 {
     LOG_TRA("");
+
+    if (config.viewerType != config::VslamViewerType::SOCKET)
+    {
+        THROWLOG(SysException, "Type mismatch: SocketViewerAdapter can be used only with SOCKET viewer type.");
+    }
+    impl_ = std::make_unique<SocketViewerAdapterImpl>(config);
 }
 
 SocketViewerAdapter::~SocketViewerAdapter()

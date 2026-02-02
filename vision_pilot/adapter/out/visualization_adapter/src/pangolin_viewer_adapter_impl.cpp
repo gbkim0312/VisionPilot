@@ -1,5 +1,4 @@
 #include "pangolin_viewer_adapter_impl.hpp"
-#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 
 namespace vp::adapter::out
@@ -19,10 +18,7 @@ PangolinViewerAdapterImpl::~PangolinViewerAdapterImpl()
 bool PangolinViewerAdapterImpl::start() const
 {
     LOG_TRA("Starting Pangolin Viewer...");
-    if (config_.viewerType != config::VslamViewerType::PANGOLIN)
-    {
-        THROWLOG(SysException, "Type mismatch: PangolinViewerAdapterImpl can be used only with PANGOLIN viewer type.");
-    }
+
     return true;
 }
 bool PangolinViewerAdapterImpl::stop() const

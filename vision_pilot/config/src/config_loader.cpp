@@ -1,4 +1,5 @@
 #include "config_loader.hpp"
+#include "assembly_config.hpp"
 #include "gaia_json_util.hpp"
 #include "gaia_log.hpp"
 
@@ -25,6 +26,14 @@ const AssemblyConfig &ConfigLoader::getAssemblyConfig() const
     LOG_TRA("");
 
     return assembly_config_;
+}
+
+void ConfigLoader::printConfig() const
+{
+    LOG_TRA("");
+
+    auto json_str = structToJsonStr(assembly_config_);
+    LOG_INF("Current Assembly Configuration: {}", json_str);
 }
 
 void ConfigLoader::loadConfigFromFile(const std::string &config_path)

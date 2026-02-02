@@ -27,9 +27,13 @@ protected:
         yolo_config_.inputHeight = 640;
         yolo_config_.useCuda = false;
 
+        auto detection_config = config::DetectionConfig{};
+        detection_config.type = config::DetectionType::YOLOV8;
+        detection_config.modelConfig = yolo_config_;
+
         localization_adapter_ = std::make_unique<adapter::out::NoSlamAdapter>(vslam_config_);
         visualization_adapter_ = std::make_unique<adapter::out::OpenCVViewerAdapter>(vslam_viewer_config_);
-        object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(yolo_config_);
+        object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(detection_config);
 
         vision_pilot_service_ = std::make_unique<VisionPilotService>(*localization_adapter_, *visualization_adapter_, *object_detection_adapter_);
 

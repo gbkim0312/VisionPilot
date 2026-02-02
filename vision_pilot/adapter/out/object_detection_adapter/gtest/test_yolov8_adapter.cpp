@@ -20,7 +20,11 @@ protected:
         config_.inputHeight = 640;
         config_.useCuda = false;
 
-        adapter_ = std::make_unique<YOLOv8Adapter>(config_);
+        auto detection_config = config::DetectionConfig{};
+        detection_config.type = config::DetectionType::YOLOV8;
+        detection_config.modelConfig = config_;
+
+        adapter_ = std::make_unique<YOLOv8Adapter>(detection_config);
     }
     void TearDown() override
     {

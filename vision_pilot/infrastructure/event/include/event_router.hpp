@@ -21,6 +21,7 @@ public:
 
 private:
     void run();
+    void routeImageEvent(const domain::model::Event &evt);
 
     EventQueue &queue_;
     port::in::FrameReceiveUseCase &image_port_;

@@ -48,11 +48,6 @@ bool MonoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
-    if (vslam_config_.method != config::VslamMethod::MONOCULAR)
-    {
-        THROWLOG(SysException, "Type mismatch: MonoVSlamAdapterImpl can be used only with MONOCULAR VSLAM method.");
-    }
-
     if (is_initialized_)
     {
         LOG_INF("VSLAM Adapter is already initialized.");

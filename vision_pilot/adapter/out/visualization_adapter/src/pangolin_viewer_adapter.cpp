@@ -1,13 +1,18 @@
 #include "pangolin_viewer_adapter.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "pangolin_viewer_adapter_impl.hpp"
 
 namespace vp::adapter::out
 {
 PangolinViewerAdapter::PangolinViewerAdapter(const config::VslamViewerConfig &config)
-    : impl_(std::make_unique<PangolinViewerAdapterImpl>(config))
 {
     LOG_TRA("");
+    if (config.viewerType != config::VslamViewerType::PANGOLIN)
+    {
+        THROWLOG(SysException, "Type mismatch: PangolinViewerAdapter can be used only with PANGOLIN viewer type.");
+    }
+    impl_ = std::make_unique<PangolinViewerAdapterImpl>(config);
 }
 PangolinViewerAdapter::~PangolinViewerAdapter()
 {

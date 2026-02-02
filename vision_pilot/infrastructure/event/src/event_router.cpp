@@ -45,8 +45,7 @@ void EventRouter::run()
     LOG_TRA("EventRouter run loop started.");
     while (running_)
     {
-        // 큐에서 이벤트 하나 꺼내기 (데이터가 올 때까지 blocking)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         if (queue_.empty())
         {
@@ -59,16 +58,9 @@ void EventRouter::run()
             switch (evt.type)
             {
             case domain::model::EventType::IMAGE:
-            {
-                auto *packet = std::get_if<domain::model::ImageEventPayload>(&evt.data);
-                if (packet != nullptr)
-                {
-                    image_port_.onFrameReceived(**packet);
-                }
+                this->routeImageEvent(evt);
                 break;
-            }
             case domain::model::EventType::IMU:
-                // imu_port_.onImuReceived(std::any_cast<ImuPacket>(evt.data));
             default:
                 LOG_WRN("Unknown event type received in EventRouter.");
                 break;
@@ -79,6 +71,17 @@ void EventRouter::run()
             LOG_ERR("Event data casting failed: {}", e.what());
         }
     }
+}
+
+void EventRouter::routeImageEvent(const domain::model::Event &evt)
+{
+    const auto *image_packet = std::get_if<domain::model::ImageEventPayload>(&evt.data);
+    if (image_packet == nullptr)
+    {
+        LOG_WRN("Invalid event data for IMAGE event type.");
+        return;
+    }
+    image_port_.onFrameReceived(**image_packet);
 }
 
 } // namespace vp::infrastructure::event

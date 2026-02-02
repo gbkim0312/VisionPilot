@@ -1,8 +1,8 @@
 #pragma once
 
 #include "detection.hpp"
+#include "detection_config.hpp"
 #include "object_detection_port.hpp"
-#include "yolov8_config.hpp"
 #include <memory>
 #include <vector>
 
@@ -13,7 +13,7 @@ class YOLOv8AdapterImpl;
 class YOLOv8Adapter : public vp::port::out::ObjectDetectionPort
 {
 public:
-    YOLOv8Adapter(const config::YoloConfig &config);
+    YOLOv8Adapter(const config::DetectionConfig &config);
     ~YOLOv8Adapter() override;
 
     bool initialize();

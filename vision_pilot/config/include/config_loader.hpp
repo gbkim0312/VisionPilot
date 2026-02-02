@@ -11,6 +11,7 @@ public:
     bool isLoaded() const;
 
     const AssemblyConfig &getAssemblyConfig() const;
+    void printConfig() const;
 
 private:
     bool is_loaded_{false};

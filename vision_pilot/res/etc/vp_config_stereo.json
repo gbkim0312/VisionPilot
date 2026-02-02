@@ -42,12 +42,15 @@
     "vslamViewerConfig": {
         "viewerType": "opencv" // [pangolin|opencv|socket|none]
     },
-    "yoloConfig": {
-        "modelPath": "./etc/yolov8n.onnx",
-        "confThreshold": 0.25,
-        "nmsThreshold": 0.45,
-        "inputWidth": 640,
-        "inputHeight": 640,
-        "useCuda": false
+    "detectionConfig": {
+        "type": "yolov8", // [yolov8|none]
+        "yolov8": {
+            "modelPath": "./etc/yolov8n.onnx",
+            "confThreshold": 0.25,
+            "nmsThreshold": 0.45,
+            "inputWidth": 640,
+            "inputHeight": 640,
+            "useCuda": false
+        }
     }
 }

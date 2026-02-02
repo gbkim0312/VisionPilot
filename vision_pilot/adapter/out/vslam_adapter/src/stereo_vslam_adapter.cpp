@@ -1,12 +1,20 @@
 #include "stereo_vslam_adapter.hpp"
+#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "stereo_vslam_adapter_impl.hpp"
 
 namespace vp::adapter::out
 {
 StereoVSlamAdapter::StereoVSlamAdapter(const config::VslamAdapterConfig &vslam_config)
-    : impl_(std::make_unique<StereoVSlamAdapterImpl>(vslam_config))
 {
+    LOG_TRA("");
+
+    if (vslam_config.method != config::VslamMethod::STEREO)
+    {
+        THROWLOG(SysException, "Type mismatch: StereoVSlamAdapterImpl can be used only with STEREO VSLAM method.");
+    }
+
+    impl_ = std::make_unique<StereoVSlamAdapterImpl>(vslam_config);
 }
 
 StereoVSlamAdapter::~StereoVSlamAdapter()

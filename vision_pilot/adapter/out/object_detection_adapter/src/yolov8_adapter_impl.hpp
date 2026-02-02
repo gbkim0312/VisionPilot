@@ -1,8 +1,8 @@
 #pragma once
 
 #include "detection.hpp"
+#include "detection_config.hpp"
 #include "image.hpp"
-#include "yolov8_config.hpp"
 #include <memory>
 #include <opencv2/dnn.hpp>
 #include <vector>

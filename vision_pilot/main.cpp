@@ -143,6 +143,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    configLoader.printConfig();
+
     vp::assembly::Assembly assembly(configLoader.getAssemblyConfig());
     assembly.startService();
 

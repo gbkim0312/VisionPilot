@@ -46,11 +46,6 @@ bool StereoVSlamAdapterImpl::initialize()
 {
     LOG_INF("Initializing Stereo VSLAM Adapter...");
 
-    if (vslam_config_.method != config::VslamMethod::STEREO)
-    {
-        THROWLOG(SysException, "Type mismatch: StereoVSlamAdapterImpl can be used only with STEREO VSLAM method.");
-    }
-
     if (is_initialized_)
     {
         LOG_INF("Stereo VSLAM Adapter is already initialized.");
