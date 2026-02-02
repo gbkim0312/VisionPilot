@@ -10,7 +10,7 @@ enum class VslamMethod
     MONOCULAR = 0,
     STEREO = 1,
     RGB_D = 2,
-    DISABLED = -1
+    WITH_IMU = 3
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
@@ -18,7 +18,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
                                  {VslamMethod::MONOCULAR, "monocular"},
                                  {VslamMethod::STEREO, "stereo"},
                                  {VslamMethod::RGB_D, "rgbd"},
-                                 {VslamMethod::DISABLED, "disabled"},
+                                 {VslamMethod::WITH_IMU, "withIMU"},
                              })
 
 enum class SaveType
@@ -109,8 +109,23 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LoadConfig,
                                    loadMapDatabase,
                                    path)
 
+enum class VslamType
+{
+    ORB_SLAM3 = 0,
+    STELLA_VSLAM = 1,
+    NONE
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(VslamType,
+                             {
+                                 {VslamType::ORB_SLAM3, "orbSlam3"},
+                                 {VslamType::STELLA_VSLAM, "stellaVslam"},
+                                 {VslamType::NONE, "none"},
+                             })
+
 struct VslamAdapterConfig
 {
+    VslamType type = VslamType::STELLA_VSLAM;
     VslamMethod method = VslamMethod::MONOCULAR;
     std::string vslamConfigFilePath; // VSLAM용 설정 파일 경로
     std::string vocabPath;           // VSLAM용 보캐뷸러리 파일 경로
@@ -120,6 +135,7 @@ struct VslamAdapterConfig
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamAdapterConfig,
+                                   type,
                                    vslamConfigFilePath,
                                    method,
                                    vocabPath,

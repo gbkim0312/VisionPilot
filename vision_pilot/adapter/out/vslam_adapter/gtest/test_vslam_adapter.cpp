@@ -1,7 +1,8 @@
 #include "gaia_dir.hpp"
 #include "gaia_log.hpp"
 #include "image.hpp"
-#include "mono_vslam_adapter.hpp"
+#include "stella_vslam_adapter.hpp"
+#include "vslam_config.hpp"
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
@@ -35,7 +36,7 @@ protected:
         };
 
         // 3. 어댑터 초기화 및 검증
-        vslam_adapter_ = std::make_unique<MonoVSlamAdapter>(vslam_config_);
+        vslam_adapter_ = std::make_unique<StellaVslamAdapter>(vslam_config_);
         ASSERT_TRUE(vslam_adapter_->initialize()) << "VSLAM Adapter initialization failed!";
 
         // 4. vp 유틸리티를 사용한 이미지 파일 목록 읽기
@@ -86,7 +87,7 @@ protected:
     }
 
     config::VslamAdapterConfig vslam_config_;
-    std::unique_ptr<MonoVSlamAdapter> vslam_adapter_;
+    std::unique_ptr<StellaVslamAdapter> vslam_adapter_;
     std::vector<std::string> image_filenames_;
     std::vector<std::string> image_full_paths_;
     std::vector<uint64_t> timestamps_;

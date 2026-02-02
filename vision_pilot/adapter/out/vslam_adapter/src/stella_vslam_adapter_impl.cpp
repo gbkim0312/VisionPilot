@@ -1,6 +1,8 @@
-#include "mono_vslam_adapter_impl.hpp"
+#include "stella_vslam_adapter_impl.hpp"
+
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
+#include "pose.hpp"
 #include "stella_vslam/config.h"
 #include <exception>
 #include <opencv2/imgcodecs.hpp>
@@ -29,13 +31,13 @@ std::string convertSaveFormatToString(std::optional<vp::config::SaveFormat> form
 
 namespace vp::adapter::out
 {
-MonoVSlamAdapterImpl::MonoVSlamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
+StellaVslamAdapterImpl::StellaVslamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
     : vslam_config_{vslam_config}
 {
     LOG_TRA("");
 }
 
-MonoVSlamAdapterImpl::~MonoVSlamAdapterImpl()
+StellaVslamAdapterImpl::~StellaVslamAdapterImpl()
 {
     LOG_TRA("");
     if (slam_system_)
@@ -44,7 +46,7 @@ MonoVSlamAdapterImpl::~MonoVSlamAdapterImpl()
     }
 }
 
-bool MonoVSlamAdapterImpl::initialize()
+bool StellaVslamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
@@ -79,25 +81,32 @@ bool MonoVSlamAdapterImpl::initialize()
     return true;
 }
 
-domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacket &image, uint64_t timestamp)
+domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePacket &image, uint64_t timestamp)
 {
-    LOG_TRA("");
-
-    if (!is_initialized_ || slam_system_ == nullptr)
+    if (!is_initialized_)
     {
-        LOG_ERR("VSLAM system is not initialized.");
+        LOG_WRN("VSLAM Adapter is not initialized. Call initialize() before update().");
         return domain::model::Pose{};
     }
 
-    while (slam_system_->loop_BA_is_running())
+    switch (vslam_config_.method)
     {
-        LOG_DBG("Waiting for loop bundle adjustment to complete...");
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        // TODO(GBKIM): 실제 구현 시에는 빈 포즈나 이 전 pose를 내보내도록 고려 필요
+    case config::VslamMethod::MONOCULAR:
+        return this->feedMonoFrame(image, timestamp);
+    case config::VslamMethod::STEREO:
+        return this->feedStereoFrame(image, timestamp);
+    default:
+        LOG_ERR("Unsupported VSLAM method in update(): {}", static_cast<int>(vslam_config_.method));
+        return domain::model::Pose{};
     }
+}
+
+domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
+{
+    LOG_TRA("");
 
     const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
-    if (image.format != domain::model::ImageFormat::MONO || mono_payload == nullptr)
+    if (mono_payload == nullptr)
     {
         THROWLOG(SysException, "Invalid image payload for Mono VSLAM Adapter. Check VideoLoader configuration.");
     }
@@ -121,9 +130,76 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     LOG_DBG("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, timestamp, channels == 3 ? "true" : "false", time_in_seconds);
 
     auto raw_pose = slam_system_->feed_monocular_frame(img, time_in_seconds);
+    return this->convertStellaPoseToDomainPose(raw_pose);
+}
 
+bool StellaVslamAdapterImpl::deinitialize()
+{
+    LOG_INF("Deinitializing VSLAM Adapter...");
+
+    if (!is_initialized_)
+    {
+        LOG_INF("VSLAM Adapter is not initialized. Nothing to deinitialize.");
+        return true;
+    }
+
+    try
+    {
+        slam_system_->shutdown();
+        slam_system_.reset();
+        is_initialized_ = false;
+        LOG_INF("VSLAM Adapter deinitialized successfully.");
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERR("VSLAM deinitialization failed: {}", e.what());
+        return false;
+    }
+
+    return true;
+}
+
+domain::model::Pose StellaVslamAdapterImpl::feedStereoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
+{
+    LOG_TRA("");
+
+    const auto *stereo_payload = std::get_if<domain::model::StereoImagePacket>(&image.payload);
+    if (stereo_payload == nullptr)
+    {
+        THROWLOG(SysException, "Invalid image payload for Stereo VSLAM Adapter. Check VideoLoader configuration.");
+    }
+
+    const auto &left_frame = stereo_payload->left;
+    const auto &right_frame = stereo_payload->right;
+
+    const auto rows = left_frame.height;
+    const auto cols = left_frame.width;
+    const auto channels = left_frame.channels;
+    auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
+
+    cv::Mat left_img(rows, cols, type, const_cast<uint8_t *>(left_frame.data.data()));   // NOLINT: OPENCV
+    cv::Mat right_img(rows, cols, type, const_cast<uint8_t *>(right_frame.data.data())); // NOLINT: OPENCV
+
+    if (left_img.empty() || right_img.empty())
+    {
+        LOG_ERR("Failed to decode stereo frames.");
+        return domain::model::Pose{};
+    }
+
+    constexpr auto kMicroSecondsInSecond = 1000000;
+    double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
+
+    LOG_DBG("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, timestamp, channels == 3 ? "true" : "false", time_in_seconds);
+
+    auto raw_pose = slam_system_->feed_stereo_frame(left_img, right_img, time_in_seconds);
+    return this->convertStellaPoseToDomainPose(raw_pose);
+}
+
+domain::model::Pose StellaVslamAdapterImpl::convertStellaPoseToDomainPose(const std::shared_ptr<stella_vslam::Mat44_t> &raw_pose)
+{
     domain::model::Pose pose;
-    if (raw_pose)
+
+    if (raw_pose != nullptr)
     {
         const Eigen::Matrix4d mat = raw_pose->cast<double>();
         const Eigen::Matrix3d rot = mat.block<3, 3>(0, 0);
@@ -146,62 +222,9 @@ domain::model::Pose MonoVSlamAdapterImpl::update(const domain::model::ImagePacke
     else
     {
         pose.is_lost = true;
-        LOG_DBG("VSLAM tracking lost at ts: {}", timestamp);
+        LOG_DBG("VSLAM tracking lost.");
     }
 
     return pose;
 }
-
-bool MonoVSlamAdapterImpl::stop()
-{
-    LOG_TRA("Stopping VSLAM Adapter...");
-
-    if (!is_initialized_)
-    {
-        LOG_WRN("VSLAM Adapter is not initialized.");
-        return true;
-    }
-
-    for (const auto &save_config : vslam_config_.saveConfig)
-    {
-        switch (save_config.saveTypes)
-        {
-        case config::SaveType::MAP_DATABASE:
-            LOG_INF("Saving VSLAM map to: {}", save_config.path);
-            slam_system_->save_map_database(save_config.path);
-            LOG_INF("VSLAM map saved successfully.");
-            break;
-        case config::SaveType::FULL_TRAJECTORY:
-            LOG_INF("Saving VSLAM trajectory to: {}", save_config.path);
-            slam_system_->save_frame_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
-            LOG_INF("VSLAM trajectory saved successfully.");
-            break;
-        case config::SaveType::KEYFRAME_TRAJECTORY:
-            LOG_INF("Saving VSLAM keyframe trajectory to: {}", save_config.path);
-            slam_system_->save_keyframe_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
-            LOG_INF("VSLAM keyframe trajectory saved successfully.");
-            break;
-        default:
-            LOG_WRN("Unknown SaveType encountered during VSLAM shutdown.");
-            break;
-        }
-    }
-
-    if (slam_system_)
-    {
-        LOG_INF("Shutting down VSLAM system...");
-        slam_system_->shutdown();
-        slam_system_.reset();
-
-        LOG_INF("VSLAM system shut down and reset successfully.");
-    }
-    else
-    {
-        LOG_WRN("VSLAM system was not initialized or already shut down.");
-    }
-
-    is_initialized_ = false;
-    return true;
-}
-
 } // namespace vp::adapter::out

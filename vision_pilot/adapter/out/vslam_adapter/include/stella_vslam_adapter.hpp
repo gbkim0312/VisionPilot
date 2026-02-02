@@ -5,19 +5,19 @@
 
 namespace vp::adapter::out
 {
-class StereoVSlamAdapterImpl;
+class StellaVslamAdapterImpl;
 
-class StereoVSlamAdapter : public vp::port::out::LocalizationPort
+class StellaVslamAdapter : public vp::port::out::LocalizationPort
 {
 public:
-    StereoVSlamAdapter(const config::VslamAdapterConfig &vslam_config);
-    ~StereoVSlamAdapter() override;
+    StellaVslamAdapter(const config::VslamAdapterConfig &vslam_config);
+    ~StellaVslamAdapter() override;
 
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
     bool deinitialize();
 
 private:
-    std::unique_ptr<StereoVSlamAdapterImpl> impl_;
+    std::unique_ptr<StellaVslamAdapterImpl> impl_;
 };
 } // namespace vp::adapter::out

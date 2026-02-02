@@ -9,19 +9,17 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
 {
     LOG_TRA("");
 
-    switch (config_.vslamAdapterConfig.method)
+    switch (config_.vslamAdapterConfig.type)
     {
-    case config::VslamMethod::MONOCULAR:
-        mono_vslam_adapter_ = std::make_unique<vp::adapter::out::MonoVSlamAdapter>(config_.vslamAdapterConfig);
+    case config::VslamType::STELLA_VSLAM:
+        stella_vslam_adapter_ = std::make_unique<vp::adapter::out::StellaVslamAdapter>(config_.vslamAdapterConfig);
         break;
-    case config::VslamMethod::STEREO:
-        stereo_vslam_adapter_ = std::make_unique<vp::adapter::out::StereoVSlamAdapter>(config_.vslamAdapterConfig);
-        break;
-    case config::VslamMethod::DISABLED:
-        no_slam_adapter_ = std::make_unique<vp::adapter::out::NoSlamAdapter>(config_.vslamAdapterConfig);
+    case config::VslamType::NONE:
+        no_vslam_adapter_ = std::make_unique<vp::adapter::out::NoVslamAdapter>();
+        LOG_INF("No VSLAM adapter selected.");
         break;
     default:
-        THROWLOG(SysException, "Unsupported VSLAM method specified in configuration.");
+        THROWLOG(SysException, "Unsupported VSLAM type specified in configuration.");
     }
 
     switch (config_.vslamViewerConfig.viewerType)
@@ -79,16 +77,10 @@ void OutAdapterRegistry::startExternalAdapters()
         break;
     }
 
-    switch (config_.vslamAdapterConfig.method)
+    switch (config_.vslamAdapterConfig.type)
     {
-    case config::VslamMethod::MONOCULAR:
-        mono_vslam_adapter_->initialize();
-        break;
-    case config::VslamMethod::STEREO:
-        stereo_vslam_adapter_->initialize();
-        break;
-    case config::VslamMethod::DISABLED:
-        no_slam_adapter_->initialize();
+    case config::VslamType::STELLA_VSLAM:
+        stella_vslam_adapter_->initialize();
         break;
     default:
         LOG_WRN("Unsupported VSLAM method. No localization adapter will be started.");
@@ -126,16 +118,10 @@ void OutAdapterRegistry::stopExternalAdapters()
         break;
     }
 
-    switch (config_.vslamAdapterConfig.method)
+    switch (config_.vslamAdapterConfig.type)
     {
-    case config::VslamMethod::MONOCULAR:
-        mono_vslam_adapter_->deinitialize();
-        break;
-    case config::VslamMethod::STEREO:
-        stereo_vslam_adapter_->deinitialize();
-        break;
-    case config::VslamMethod::DISABLED:
-        no_slam_adapter_->deinitialize();
+    case config::VslamType::STELLA_VSLAM:
+        stella_vslam_adapter_->deinitialize();
         break;
     default:
         break;
@@ -162,14 +148,10 @@ void OutAdapterRegistry::stopExternalAdapters()
 
 vp::port::out::LocalizationPort &OutAdapterRegistry::getLocalizationPort()
 {
-    switch (config_.vslamAdapterConfig.method)
+    switch (config_.vslamAdapterConfig.type)
     {
-    case config::VslamMethod::MONOCULAR:
-        return *mono_vslam_adapter_;
-    case config::VslamMethod::STEREO:
-        return *stereo_vslam_adapter_;
-    case config::VslamMethod::DISABLED:
-        return *no_slam_adapter_;
+    case config::VslamType::STELLA_VSLAM:
+        return *stella_vslam_adapter_;
     default:
         THROWLOG(SysException, "Unsupported VSLAM method. Cannot provide LocalizationPort.");
     }

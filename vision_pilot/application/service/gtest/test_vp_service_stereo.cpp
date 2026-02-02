@@ -1,6 +1,6 @@
 #include "gaia_dir.hpp"
 #include "opencv_viewer_adapter.hpp"
-#include "stereo_vslam_adapter.hpp"
+#include "stella_vslam_adapter.hpp"
 #include "vision_pilot_service.hpp"
 #include "vslam_config.hpp"
 #include "yolov8_adapter.hpp"
@@ -45,7 +45,7 @@ protected:
         ASSERT_TRUE(vp::isFileExist(vslam_config_.vocabPath)) << "Vocab file not found: " << vslam_config_.vocabPath;
 
         // 포트 초기화
-        localization_adapter_ = std::make_unique<adapter::out::StereoVSlamAdapter>(vslam_config_);
+        localization_adapter_ = std::make_unique<adapter::out::StellaVslamAdapter>(vslam_config_);
         visualization_adapter_ = std::make_unique<adapter::out::OpenCVViewerAdapter>(vslam_viewer_config_);
         object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(detection_config);
 
@@ -130,7 +130,7 @@ protected:
     std::vector<std::string> image1_full_paths_;
     std::vector<uint64_t> timestamps_;
 
-    std::unique_ptr<adapter::out::StereoVSlamAdapter> localization_adapter_ = nullptr;
+    std::unique_ptr<adapter::out::StellaVslamAdapter> localization_adapter_ = nullptr;
     std::unique_ptr<adapter::out::OpenCVViewerAdapter> visualization_adapter_ = nullptr;
     std::unique_ptr<adapter::out::YOLOv8Adapter> object_detection_adapter_ = nullptr;
 

@@ -1,5 +1,5 @@
 #include "gaia_dir.hpp"
-#include "no_slam_adapter.hpp"
+#include "no_vslam_adapter.hpp"
 #include "opencv_viewer_adapter.hpp"
 #include "vision_pilot_service.hpp"
 #include "yolov8_adapter.hpp"
@@ -18,8 +18,6 @@ protected:
         const std::string project_root = "/home/gbkim/project/VisionPilot";
         const std::string kitti_base = vp::joinDir(project_root, "vision_pilot/res/dataset/kitti/dataset/sequences/00");
 
-        vslam_config_.method = config::VslamMethod::DISABLED;
-
         yolo_config_.modelPath = "/home/gbkim/project/VisionPilot/vision_pilot/res/etc/yolov8n.onnx";
         yolo_config_.confThreshold = 0.25F;
         yolo_config_.nmsThreshold = 0.45F;
@@ -31,7 +29,7 @@ protected:
         detection_config.type = config::DetectionType::YOLOV8;
         detection_config.modelConfig = yolo_config_;
 
-        localization_adapter_ = std::make_unique<adapter::out::NoSlamAdapter>(vslam_config_);
+        localization_adapter_ = std::make_unique<adapter::out::NoVslamAdapter>();
         visualization_adapter_ = std::make_unique<adapter::out::OpenCVViewerAdapter>(vslam_viewer_config_);
         object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(detection_config);
 
@@ -91,7 +89,6 @@ protected:
         return packet;
     }
 
-    config::VslamAdapterConfig vslam_config_;
     config::VslamViewerConfig vslam_viewer_config_;
     config::YoloConfig yolo_config_;
 
@@ -99,7 +96,7 @@ protected:
     std::vector<std::string> image_full_paths_;
     std::vector<uint64_t> timestamps_;
 
-    std::unique_ptr<adapter::out::NoSlamAdapter> localization_adapter_;
+    std::unique_ptr<adapter::out::NoVslamAdapter> localization_adapter_;
     std::unique_ptr<adapter::out::OpenCVViewerAdapter> visualization_adapter_;
     std::unique_ptr<adapter::out::YOLOv8Adapter> object_detection_adapter_;
     std::unique_ptr<VisionPilotService> vision_pilot_service_;
@@ -112,7 +109,6 @@ TEST_F(VPServiceDetectionTest, InitializationTest)
 
 TEST_F(VPServiceDetectionTest, RunServiceTest)
 {
-    localization_adapter_->initialize();
     object_detection_adapter_->initialize();
     visualization_adapter_->start();
 

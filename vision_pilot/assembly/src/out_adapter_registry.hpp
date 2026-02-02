@@ -1,9 +1,8 @@
 #pragma once
 
 #include "assembly_config.hpp"
-#include "mono_vslam_adapter.hpp"
-#include "no_slam_adapter.hpp"
-#include "stereo_vslam_adapter.hpp"
+#include "no_vslam_adapter.hpp"
+#include "stella_vslam_adapter.hpp"
 
 #include "no_detection_adapter.hpp"
 #include "yolov8_adapter.hpp"
@@ -30,9 +29,8 @@ public:
 private:
     const config::AssemblyConfig &config_;
 
-    std::unique_ptr<vp::adapter::out::MonoVSlamAdapter> mono_vslam_adapter_;
-    std::unique_ptr<vp::adapter::out::StereoVSlamAdapter> stereo_vslam_adapter_;
-    std::unique_ptr<vp::adapter::out::NoSlamAdapter> no_slam_adapter_;
+    std::unique_ptr<vp::adapter::out::StellaVslamAdapter> stella_vslam_adapter_;
+    std::unique_ptr<vp::adapter::out::NoVslamAdapter> no_vslam_adapter_;
 
     std::unique_ptr<vp::adapter::out::NoneViewerAdapter> none_viewer_adapter_;
     std::unique_ptr<vp::adapter::out::OpenCVViewerAdapter> opencv_viewer_adapter_;
