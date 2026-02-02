@@ -28,6 +28,12 @@ protected:
         ASSERT_TRUE(vp::isFileExist(vslam_config_.vslamConfigFilePath)) << "VSLAM config file not found: " << vslam_config_.vslamConfigFilePath;
         ASSERT_TRUE(vp::isFileExist(vslam_config_.vocabPath)) << "Vocab file not found: " << vslam_config_.vocabPath;
 
+        vslam_config_.saveConfig = {
+            {config::SaveType::FULL_TRAJECTORY, config::SaveFormat::TUM, vp::joinDir(project_root, "output/kitti00_full_trajectory.txt")},
+            {config::SaveType::KEYFRAME_TRAJECTORY, config::SaveFormat::KITTI, vp::joinDir(project_root, "output/kitti00_keyframe_trajectory.txt")},
+            {config::SaveType::MAP_DATABASE, std::nullopt, vp::joinDir(project_root, "output/kitti00_map_database.msgpack")},
+        };
+
         // 3. 어댑터 초기화 및 검증
         vslam_adapter_ = std::make_unique<MonoVSlamAdapter>(vslam_config_);
         ASSERT_TRUE(vslam_adapter_->initialize()) << "VSLAM Adapter initialization failed!";

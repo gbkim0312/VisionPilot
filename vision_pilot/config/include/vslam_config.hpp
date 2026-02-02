@@ -1,5 +1,6 @@
 #pragma once
 #include "nlohmann/json.hpp"
+#include <optional>
 
 namespace vp::config
 {
@@ -20,17 +21,110 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
                                  {VslamMethod::DISABLED, "disabled"},
                              })
 
+enum class SaveType
+{
+    NONE = 0,
+    FULL_TRAJECTORY = 1,
+    KEYFRAME_TRAJECTORY = 2,
+    MAP_DATABASE = 3
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SaveType,
+                             {
+                                 {SaveType::NONE, "none"},
+                                 {SaveType::FULL_TRAJECTORY, "fullTrajectory"},
+                                 {SaveType::KEYFRAME_TRAJECTORY, "keyframeTrajectory"},
+                                 {SaveType::MAP_DATABASE, "mapDatabase"},
+                             })
+
+enum class SaveFormat
+{
+    TUM = 1,
+    KITTI = 2,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SaveFormat,
+                             {
+                                 {SaveFormat::TUM, "tum"},
+                                 {SaveFormat::KITTI, "kitti"},
+                             })
+struct SaveConfig
+{
+    SaveType saveTypes;
+    std::optional<SaveFormat> saveFormat;
+    std::string path;
+};
+
+inline void to_json(nlohmann::json &j, const SaveConfig &p)
+{
+    j = nlohmann::json{
+        {"saveTypes", p.saveTypes},
+        {"path", p.path}};
+
+    if (p.saveTypes == SaveType::FULL_TRAJECTORY ||
+        p.saveTypes == SaveType::KEYFRAME_TRAJECTORY)
+    {
+
+        if (p.saveFormat.has_value())
+        {
+            j["saveFormat"] = p.saveFormat.value();
+        }
+        else
+        {
+            j["saveFormat"] = SaveFormat::TUM;
+        }
+    }
+}
+
+inline void from_json(const nlohmann::json &j, SaveConfig &p)
+{
+    j.at("saveTypes").get_to(p.saveTypes);
+    j.at("path").get_to(p.path);
+
+    if (p.saveTypes == SaveType::FULL_TRAJECTORY ||
+        p.saveTypes == SaveType::KEYFRAME_TRAJECTORY)
+    {
+        if (j.contains("saveFormat"))
+        {
+            p.saveFormat = j.at("saveFormat").get<SaveFormat>();
+        }
+        else
+        {
+            p.saveFormat = SaveFormat::TUM; // 기본값
+        }
+    }
+    else
+    {
+        p.saveFormat = std::nullopt;
+    }
+}
+
+struct LoadConfig
+{
+    bool loadMapDatabase = false;
+    std::string path;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LoadConfig,
+                                   loadMapDatabase,
+                                   path)
+
 struct VslamAdapterConfig
 {
     VslamMethod method = VslamMethod::MONOCULAR;
     std::string vslamConfigFilePath; // VSLAM용 설정 파일 경로
     std::string vocabPath;           // VSLAM용 보캐뷸러리 파일 경로
+
+    LoadConfig loadConfig;
+    std::vector<SaveConfig> saveConfig;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamAdapterConfig,
                                    vslamConfigFilePath,
                                    method,
-                                   vocabPath)
+                                   vocabPath,
+                                   loadConfig,
+                                   saveConfig)
 
 enum class VslamViewerType
 {

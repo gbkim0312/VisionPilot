@@ -38,9 +38,9 @@ void AssemblyImpl::startService()
 void AssemblyImpl::stopService()
 {
     LOG_TRA("");
+    event_router_->stop();
     in_adapter_registry_->stopExternalAdapters();
     out_adapter_registry_->stopExternalAdapters();
-    event_router_->stop();
 }
 
 } // namespace vp::assembly

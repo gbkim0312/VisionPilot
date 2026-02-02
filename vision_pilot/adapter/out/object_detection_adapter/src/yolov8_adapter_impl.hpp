@@ -20,6 +20,7 @@ public:
     bool deinitialize();
 
 private:
+    std::mutex mutex_;
     bool is_initialized_ = false;
     std::unique_ptr<cv::dnn::Net> net_;
     const config::YoloConfig &config_;

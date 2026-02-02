@@ -33,7 +33,10 @@ bool OpenCVViewerAdapterImpl::start()
 bool OpenCVViewerAdapterImpl::stop()
 {
     LOG_INF("Stopping OpenCV Viewer...");
-    cv::destroyWindow(window_name_);
+    if (cv::getWindowProperty(window_name_, cv::WND_PROP_VISIBLE) >= 1)
+    {
+        cv::destroyWindow(window_name_);
+    }
     return true;
 }
 void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,

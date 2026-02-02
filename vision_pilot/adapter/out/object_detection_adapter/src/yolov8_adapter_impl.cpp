@@ -109,18 +109,23 @@ bool YOLOv8AdapterImpl::initialize()
 bool YOLOv8AdapterImpl::deinitialize()
 {
     LOG_TRA("");
+
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (!is_initialized_)
     {
         LOG_DBG("YOLOv8 Adapter is not initialized.");
         return true;
     }
-    net_.reset();
+    net_.reset(); // 안전하게 해제
     is_initialized_ = false;
     return true;
 }
 
 std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &image)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (!is_initialized_ || net_ == nullptr || net_->empty())
     {
         LOG_ERR("Network not initialized.");

@@ -16,7 +16,27 @@
     "vslamAdapterConfig": {
         "method": "monocular", // [monocular|stereo|rgbd|disabled]
         "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
-        "vocabPath": "./etc/orb_vocab.fbow"
+        "vocabPath": "./etc/orb_vocab.fbow",
+        "loadConfig": {
+            "loadMapDatabase": false,
+            "path": ""
+        },
+        "saveConfig": [
+            // {
+            //     "saveTypes": "fullTrajectory",
+            //     "saveFormat": "KITTI",
+            //     "path": "./output/vslam_full_trajectory.txt"
+            // },
+            {
+                "saveTypes": "fullTrajectory",
+                "saveFormat": "kitti",
+                "path": "./output/vslam_full_trajectory.txt"
+            },
+            {
+                "saveTypes": "mapDatabase",
+                "path": "./output/vslam_map_database.msgpack"
+            }
+        ]
     },
     "vslamViewerConfig": {
         "viewerType": "opencv" // [pangolin|opencv|socket|none]

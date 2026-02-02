@@ -1,6 +1,7 @@
 #include "assembly.hpp"
 #include "config_loader.hpp"
 #include "gaia_log.hpp"
+#include <csignal>
 #include <iostream>
 
 namespace
@@ -103,13 +104,16 @@ bool parseArgs(const std::vector<std::string> &args,
 
 std::atomic<bool> g_running{true};
 
-void signalHandler([[maybe_unused]] int signum)
+void signalHandler(int /* signum */)
 {
     g_running.store(false, std::memory_order_release);
 }
 
 int main(int argc, char **argv)
 {
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
+
     CliOptions options{};
     std::string error{};
 
