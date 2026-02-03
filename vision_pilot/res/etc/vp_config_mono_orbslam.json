@@ -1,0 +1,56 @@
+{
+    "videoLoaderConfig": {
+        "dataType": "frameSet",
+        "cameraFormat": "mono", // [mono|stereo]
+        "fps": 10,
+        "frameSize": {
+            "width": 0, //0: default size
+            "height": 0 //0: default size
+        },
+        "mono": {
+            "source": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0",
+            "maxImageBufferSize": 100,
+            "colorFormat": "grayscale" // [grayscale|color]
+        }
+    },
+    "vslamAdapterConfig": {
+        "type": "orbSlam3", // [stellaVslam|orbSlam3|none]
+        "method": "monocular", // [monocular|stereo|rgbd|disabled]
+        "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/ORB_SLAM3/Examples/Monocular/KITTI00-02.yaml",
+        "vocabPath": "./etc/ORBvoc.txt",
+        "loadConfig": {
+            "loadMapDatabase": false,
+            "path": ""
+        },
+        "saveConfig": [
+            // {
+            //     "saveTypes": "fullTrajectory",
+            //     "saveFormat": "KITTI",
+            //     "path": "./output/vslam_full_trajectory.txt"
+            // },
+            {
+                "saveTypes": "fullTrajectory",
+                "saveFormat": "kitti",
+                "path": "./output/vslam_full_trajectory.txt"
+            },
+            {
+                "saveTypes": "mapDatabase",
+                "path": "./output/vslam_map_database.msgpack"
+            }
+        ]
+    },
+    "vslamViewerConfig": {
+        "viewerType": "none" // [pangolin|opencv|socket|none]
+    },
+    "detectionConfig": {
+        "type": "yolov8", // [yolov8|disabled]
+        "yolov8": {
+            "modelPath": "./etc/yolov8n.onnx",
+            "confThreshold": 0.25,
+            "nmsThreshold": 0.45,
+            "inputWidth": 640,
+            "inputHeight": 640,
+            "useCuda": false
+        }
+    }
+}

@@ -87,6 +87,19 @@ void OutAdapterRegistry::startExternalAdapters()
         break;
     }
 
+    switch (config_.detectionConfig.type)
+    {
+    case config::DetectionType::YOLOV8:
+        yolo_v8_adapter_->initialize();
+        break;
+    case config::DetectionType::NONE:
+        no_detection_adapter_->initialize();
+        break;
+    default:
+        LOG_WRN("Unsupported Detection type. No object detection adapter will be started.");
+        break;
+    }
+
     switch (config_.vslamAdapterConfig.type)
     {
     case config::VslamType::STELLA_VSLAM:
@@ -99,20 +112,6 @@ void OutAdapterRegistry::startExternalAdapters()
         break;
     default:
         LOG_WRN("Unsupported VSLAM method. No localization adapter will be started.");
-        break;
-    }
-
-    switch (config_.detectionConfig.type)
-    {
-    case config::DetectionType::YOLOV8:
-
-        yolo_v8_adapter_->initialize();
-        break;
-    case config::DetectionType::NONE:
-        no_detection_adapter_->initialize();
-        break;
-    default:
-        LOG_WRN("Unsupported Detection type. No object detection adapter will be started.");
         break;
     }
 }

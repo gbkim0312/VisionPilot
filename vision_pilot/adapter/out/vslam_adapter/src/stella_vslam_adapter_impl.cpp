@@ -85,7 +85,7 @@ domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePac
 {
     if (!is_initialized_)
     {
-        LOG_WRN("VSLAM Adapter is not initialized. Call initialize() before update().");
+        LOG_INF("Stella VSLAM Adapter is not yet initialized.");
         return domain::model::Pose{};
     }
 

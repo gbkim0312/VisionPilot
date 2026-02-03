@@ -85,10 +85,9 @@ domain::model::Pose OrbSlamAdapterImpl::update(const domain::model::ImagePacket 
 {
     if (!is_initialized_)
     {
-        LOG_WRN("ORB SLAM3 Adapter is not initialized. Call initialize() before update().");
+        LOG_DBG("ORB SLAM3 Adapter is not yet initialized.");
         return domain::model::Pose{};
     }
-
     switch (config_.method)
     {
     case config::VslamMethod::MONOCULAR:
@@ -131,8 +130,6 @@ bool OrbSlamAdapterImpl::deinitialize()
 
 domain::model::Pose OrbSlamAdapterImpl::feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
 {
-    LOG_TRA("");
-
     const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
     if (mono_payload == nullptr)
     {
@@ -145,18 +142,38 @@ domain::model::Pose OrbSlamAdapterImpl::feedMonoFrame(const domain::model::Image
     auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
 
     cv::Mat img(rows, cols, type, const_cast<uint8_t *>(mono_payload->frame.data.data())); // NOLINT: OPENCV
-    if (img.empty())
+    constexpr double kMicroSecondsInSecond = 1000000.0;
+    double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
+
+    static double last_time_seconds = -1.0; // 초기값
+
+    // 시간차(dt)가 너무 작으면(0이면) 건너뛰어야 함
+    if (last_time_seconds > 0 && std::abs(time_in_seconds - last_time_seconds) < 1e-5)
     {
-        LOG_ERR("Failed to decode frame at ts: {}", timestamp);
+        LOG_WRN("⚠️ Zero Delta-Time detected! (ts: {:.6f}). Skipping to prevent Crash.", time_in_seconds);
         return domain::model::Pose{};
     }
 
-    constexpr auto kMicroSecondsInSecond = 1000000;
-    double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
+    // 시간이 역전된 경우 (데이터셋 루프 등) 초기화
+    if (time_in_seconds < last_time_seconds)
+    {
+        LOG_WRN("⚠️ Time reset detected. Resetting ORB-SLAM3 internal state.");
+        orb_slam_system_->Reset();
+    }
 
-    auto raw_pose = orb_slam_system_->TrackMonocular(img, time_in_seconds);
+    last_time_seconds = time_in_seconds;
 
-    return this->convertOrbSlamPoseToDomainPose(raw_pose);
+    try
+    {
+        // 트래킹 실행
+        auto raw_pose = orb_slam_system_->TrackMonocular(img, time_in_seconds);
+        return this->convertOrbSlamPoseToDomainPose(raw_pose);
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERR("ORB_SLAM3 Internal Error: {}", e.what());
+        return domain::model::Pose{}; // 터지지 말고 빈 포즈 리턴
+    }
 }
 
 domain::model::Pose OrbSlamAdapterImpl::feedStereoFrame(const domain::model::ImagePacket & /* image */, uint64_t /* timestamp */)

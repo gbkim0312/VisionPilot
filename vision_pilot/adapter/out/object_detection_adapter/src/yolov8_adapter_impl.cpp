@@ -48,7 +48,6 @@ YOLOv8AdapterImpl::YOLOv8AdapterImpl(const config::YoloConfig &config)
     : config_(config)
 {
     LOG_TRA("");
-    this->initialize();
 }
 
 YOLOv8AdapterImpl::~YOLOv8AdapterImpl()
