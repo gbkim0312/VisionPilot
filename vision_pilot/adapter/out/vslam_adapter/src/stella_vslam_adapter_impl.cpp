@@ -95,6 +95,8 @@ domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePac
         return this->feedMonoFrame(image, timestamp);
     case config::VslamMethod::STEREO:
         return this->feedStereoFrame(image, timestamp);
+    case config::VslamMethod::RGB_D:
+        return this->feedRgbdFrame(image, timestamp);
     default:
         LOG_ERR("Unsupported VSLAM method in update(): {}", static_cast<int>(vslam_config_.method));
         return domain::model::Pose{};
@@ -193,6 +195,13 @@ domain::model::Pose StellaVslamAdapterImpl::feedStereoFrame(const domain::model:
 
     auto raw_pose = slam_system_->feed_stereo_frame(left_img, right_img, time_in_seconds);
     return this->convertStellaPoseToDomainPose(raw_pose);
+}
+
+domain::model::Pose StellaVslamAdapterImpl::feedRgbdFrame(const domain::model::ImagePacket & /* image */, uint64_t /* timestamp */)
+{
+    LOG_TRA("");
+    LOG_WRN("RGB-D method is not yet implemented in StellaVSLAM Adapter.");
+    return domain::model::Pose{};
 }
 
 domain::model::Pose StellaVslamAdapterImpl::convertStellaPoseToDomainPose(const std::shared_ptr<stella_vslam::Mat44_t> &raw_pose)

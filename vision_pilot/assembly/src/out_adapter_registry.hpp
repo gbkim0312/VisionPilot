@@ -1,7 +1,9 @@
 #pragma once
 
 #include "assembly_config.hpp"
+
 #include "no_vslam_adapter.hpp"
+#include "orb_slam3_adapter.hpp"
 #include "stella_vslam_adapter.hpp"
 
 #include "no_detection_adapter.hpp"
@@ -30,6 +32,7 @@ private:
     const config::AssemblyConfig &config_;
 
     std::unique_ptr<vp::adapter::out::StellaVslamAdapter> stella_vslam_adapter_;
+    std::unique_ptr<vp::adapter::out::OrbSlamAdapter> orb_slam_adapter_;
     std::unique_ptr<vp::adapter::out::NoVslamAdapter> no_vslam_adapter_;
 
     std::unique_ptr<vp::adapter::out::NoneViewerAdapter> none_viewer_adapter_;

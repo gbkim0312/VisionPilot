@@ -1,6 +1,7 @@
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "out_adapter_registry.hpp"
+#include "vslam_config.hpp"
 
 namespace vp::assembly
 {
@@ -12,7 +13,12 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
     switch (config_.vslamAdapterConfig.type)
     {
     case config::VslamType::STELLA_VSLAM:
+        LOG_INF("Stella VSLAM adapter selected.");
         stella_vslam_adapter_ = std::make_unique<vp::adapter::out::StellaVslamAdapter>(config_.vslamAdapterConfig);
+        break;
+    case config::VslamType::ORB_SLAM3:
+        LOG_INF("ORB SLAM3 adapter selected.");
+        orb_slam_adapter_ = std::make_unique<vp::adapter::out::OrbSlamAdapter>(config_.vslamAdapterConfig);
         break;
     case config::VslamType::NONE:
         no_vslam_adapter_ = std::make_unique<vp::adapter::out::NoVslamAdapter>();
@@ -25,15 +31,19 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
     switch (config_.vslamViewerConfig.viewerType)
     {
     case config::VslamViewerType::NONE:
+        LOG_INF("No VSLAM viewer selected.");
         none_viewer_adapter_ = std::make_unique<vp::adapter::out::NoneViewerAdapter>(config_.vslamViewerConfig);
         break;
     case config::VslamViewerType::OPENCV:
+        LOG_INF("OpenCV VSLAM viewer selected.");
         opencv_viewer_adapter_ = std::make_unique<vp::adapter::out::OpenCVViewerAdapter>(config_.vslamViewerConfig);
         break;
     case config::VslamViewerType::PANGOLIN:
+        LOG_INF("Pangolin VSLAM viewer selected.");
         pangolin_viewer_adapter_ = std::make_unique<vp::adapter::out::PangolinViewerAdapter>(config_.vslamViewerConfig);
         break;
     case config::VslamViewerType::SOCKET:
+        LOG_INF("Socket VSLAM viewer selected.");
         socket_viewer_adapter_ = std::make_unique<vp::adapter::out::SocketViewerAdapter>(config_.vslamViewerConfig);
         break;
     default:
@@ -43,9 +53,11 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
     switch (config_.detectionConfig.type)
     {
     case config::DetectionType::YOLOV8:
+        LOG_INF("YOLOv8 detection adapter selected.");
         yolo_v8_adapter_ = std::make_unique<vp::adapter::out::YOLOv8Adapter>(config_.detectionConfig);
         break;
     case config::DetectionType::NONE:
+        LOG_INF("No detection adapter selected.");
         no_detection_adapter_ = std::make_unique<vp::adapter::out::NoDetectionAdapter>();
         break;
     default:
@@ -65,11 +77,9 @@ void OutAdapterRegistry::startExternalAdapters()
         opencv_viewer_adapter_->start();
         break;
     case config::VslamViewerType::PANGOLIN:
-        LOG_WRN("Pangolin viewer is not yet implemented.");
         pangolin_viewer_adapter_->start();
         break;
     case config::VslamViewerType::SOCKET:
-        LOG_WRN("Socket viewer is not yet implemented.");
         socket_viewer_adapter_->start();
         break;
     default:
@@ -81,6 +91,11 @@ void OutAdapterRegistry::startExternalAdapters()
     {
     case config::VslamType::STELLA_VSLAM:
         stella_vslam_adapter_->initialize();
+        break;
+    case config::VslamType::ORB_SLAM3:
+        orb_slam_adapter_->initialize();
+        break;
+    case config::VslamType::NONE:
         break;
     default:
         LOG_WRN("Unsupported VSLAM method. No localization adapter will be started.");
@@ -123,6 +138,9 @@ void OutAdapterRegistry::stopExternalAdapters()
     case config::VslamType::STELLA_VSLAM:
         stella_vslam_adapter_->deinitialize();
         break;
+    case config::VslamType::ORB_SLAM3:
+        orb_slam_adapter_->deinitialize();
+        break;
     default:
         break;
     }
@@ -152,6 +170,8 @@ vp::port::out::LocalizationPort &OutAdapterRegistry::getLocalizationPort()
     {
     case config::VslamType::STELLA_VSLAM:
         return *stella_vslam_adapter_;
+    case config::VslamType::ORB_SLAM3:
+        return *orb_slam_adapter_;
     case config::VslamType::NONE:
         return *no_vslam_adapter_;
     default:

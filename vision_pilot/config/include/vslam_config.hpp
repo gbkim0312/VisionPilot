@@ -10,7 +10,9 @@ enum class VslamMethod
     MONOCULAR = 0,
     STEREO = 1,
     RGB_D = 2,
-    WITH_IMU = 3
+    IMU_MONOCULAR = 3,
+    IMU_STEREO = 4,
+    IMU_RGB_D = 5
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
@@ -18,7 +20,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VslamMethod,
                                  {VslamMethod::MONOCULAR, "monocular"},
                                  {VslamMethod::STEREO, "stereo"},
                                  {VslamMethod::RGB_D, "rgbd"},
-                                 {VslamMethod::WITH_IMU, "withIMU"},
+                                 {VslamMethod::IMU_MONOCULAR, "imuMonocular"},
+                                 {VslamMethod::IMU_STEREO, "imuStereo"},
+                                 {VslamMethod::IMU_RGB_D, "imuRgbd"},
                              })
 
 enum class SaveType

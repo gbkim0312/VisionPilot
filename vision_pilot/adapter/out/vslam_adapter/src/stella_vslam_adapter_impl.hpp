@@ -27,6 +27,7 @@ private:
 
     domain::model::Pose feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
     domain::model::Pose feedStereoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
+    domain::model::Pose feedRgbdFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
 
     domain::model::Pose convertStellaPoseToDomainPose(const std::shared_ptr<stella_vslam::Mat44_t> &raw_pose);
 };

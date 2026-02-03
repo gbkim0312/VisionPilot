@@ -97,52 +97,81 @@ cmake -S "$THIRD_PARTY_DIR/socket_publisher" -B "$SOCK_PUB_BUILD_DIR" "${COMMON_
 cmake --build "$SOCK_PUB_BUILD_DIR" -j$CORES
 cmake --install "$SOCK_PUB_BUILD_DIR"
 
-# --- STEP 7: ORB_SLAM3 (FIXED: C++14 Forced) ---
+# --- STEP 7: ORB_SLAM3 (ULTIMATE FIX: Force C++14) ---
 echo "📦 [7/8] Building ORB_SLAM3..."
 
 ORB_ROOT="$THIRD_PARTY_DIR/ORB_SLAM3"
 ORB_BUILD_DIR="$COMMON_BUILD_DIR/$BUILD_TYPE_LOWER/orb_slam3"
 
-# [핵심 수정] C++11 -> C++14로 강제 변경
-# 1. CMAKE_CXX_STANDARD 변수 수정
-sed -i 's/set(CMAKE_CXX_STANDARD 11)/set(CMAKE_CXX_STANDARD 14)/g' "$ORB_ROOT/CMakeLists.txt" || true
+# 기존 빌드 캐시가 꼬였을 수 있으므로 삭제 (매우 중요)
+rm -rf "$ORB_BUILD_DIR"
+rm -rf "$ORB_ROOT/Thirdparty/DBoW2/build"
+rm -rf "$ORB_ROOT/Thirdparty/g2o/build"
 
-# 2. [핵심] CMAKE_CXX_FLAGS 내에 하드코딩된 "-std=c++11" 문자열 치환
-# ORB_SLAM3는 보통 set(CMAKE_CXX_FLAGS "... -std=c++11 ...") 이렇게 작성되어 있어 이 부분이 필수입니다.
-sed -i 's/-std=c++11/-std=c++14/g' "$ORB_ROOT/CMakeLists.txt" || true
+# [핵심] 모든 CMakeLists.txt에서 C++11을 C++14로 강제 치환
+echo "   -> Patching ALL CMakeLists.txt to enforce C++14..."
+find "$ORB_ROOT" -name "CMakeLists.txt" -print0 | xargs -0 sed -i 's/CMAKE_CXX_STANDARD 11/CMAKE_CXX_STANDARD 14/g'
+find "$ORB_ROOT" -name "CMakeLists.txt" -print0 | xargs -0 sed -i 's/-std=c++11/-std=c++14/g'
 
-# 1. ORB_SLAM3 내장 DBoW2 빌드 (이걸 해야 libDBoW2.so가 생김)
-echo "   -> Building internal DBoW2 for ORB_SLAM3..."
+# 1. DBoW2 빌드
+echo "   -> Building internal DBoW2..."
 cd "$ORB_ROOT/Thirdparty/DBoW2"
-mkdir -p build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "${COMMON_ARGS[@]}"
+mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+         -DCMAKE_CXX_STANDARD=14 \
+         "${COMMON_ARGS[@]}"
 cmake --build . -j$CORES
 
-# 2. ORB_SLAM3 내장 g2o 빌드 (시스템 g2o가 있어도 내부 버전을 써야 함)
-echo "   -> Building internal g2o for ORB_SLAM3..."
+# 2. g2o 빌드
+echo "   -> Building internal g2o..."
 cd "$ORB_ROOT/Thirdparty/g2o"
-mkdir -p build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "${COMMON_ARGS[@]}"
+mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+         -DCMAKE_CXX_STANDARD=14 \
+         "${COMMON_ARGS[@]}"
 cmake --build . -j$CORES
 
 # 3. Main ORB_SLAM3 빌드
 echo "   -> Building ORB_SLAM3 Core..."
 mkdir -p "$ORB_BUILD_DIR"
-# 소스 경로는 그대로 두고 빌드 폴더만 분리
-# C++14 적용 확인을 위해 cmake 재설정
+
 cmake -S "$ORB_ROOT" -B "$ORB_BUILD_DIR" "${COMMON_ARGS[@]}" \
+    -DCMAKE_CXX_STANDARD=14 \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_RGBD_EXAMPLES=OFF \
     -DBUILD_STEREO_EXAMPLES=OFF
 
-cmake --build "$ORB_BUILD_DIR" -j$CORES
+# 빌드 실행 (메모리 부족 방지를 위해 실패 시 단일 코어로 재시도)
+if ! cmake --build "$ORB_BUILD_DIR" -j$CORES; then
+    echo "⚠️ Parallel build failed. Retrying with -j 1 (Please wait)..."
+    cmake --build "$ORB_BUILD_DIR" -j 1
+fi
 
-# 설치 시도 (실패해도 넘어가도록 처리)
-echo "Installing ORB_SLAM3..."
-cmake --install "$ORB_BUILD_DIR" || echo "⚠️ ORB_SLAM3 install skipped (No install target)."
+# 4. 수동 설치 (Manual Install)
+# ORB_SLAM3는 install 타겟이 없으므로 직접 파일을 옮겨줘야 합니다.
+echo "   -> Manually installing libraries and headers..."
+mkdir -p "$INSTALL_DIR/lib"
+mkdir -p "$INSTALL_DIR/include/ORB_SLAM3"
+
+# 라이브러리 복사 (빌드된 위치에서 찾아서 복사)
+if [ -f "$ORB_BUILD_DIR/lib/libORB_SLAM3.so" ]; then
+    cp "$ORB_BUILD_DIR/lib/libORB_SLAM3.so" "$INSTALL_DIR/lib/"
+    echo "   ✅ libORB_SLAM3.so copied successfully."
+elif [ -f "$ORB_ROOT/lib/libORB_SLAM3.so" ]; then
+    # 혹시 소스 트리 내부에 생겼을 경우
+    cp "$ORB_ROOT/lib/libORB_SLAM3.so" "$INSTALL_DIR/lib/"
+    echo "   ✅ libORB_SLAM3.so copied successfully (from source tree)."
+else
+    echo "   ❌ Error: libORB_SLAM3.so not found! Build must have failed."
+    exit 1
+fi
+
+# 헤더 파일 통째로 복사
+cp -r "$ORB_ROOT/include/"* "$INSTALL_DIR/include/ORB_SLAM3/"
+# ORB_SLAM3는 include 경로가 좀 지저분해서, 소스 루트의 Thirdparty도 필요할 수 있음
+mkdir -p "$INSTALL_DIR/include/ORB_SLAM3/Thirdparty"
+cp -r "$ORB_ROOT/Thirdparty/"* "$INSTALL_DIR/include/ORB_SLAM3/Thirdparty/" 2>/dev/null || true
 
 # 원래 위치로 복귀
 cd "$ROOT_DIR"
