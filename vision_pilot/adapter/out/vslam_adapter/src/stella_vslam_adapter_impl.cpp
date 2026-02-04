@@ -74,10 +74,22 @@ bool StellaVslamAdapterImpl::initialize()
             LOG_WRN("Failed to initialize internal viewer.");
         }
 
-        // Load map database if specified
+        if (vslam_config_.loadConfig.loadMapDatabase)
+        {
+            LOG_INF("Loading map database from: {}", vslam_config_.loadConfig.path);
+            slam_system_->load_map_database(vslam_config_.loadConfig.path);
+            LOG_INF("Map database loaded successfully.");
+        }
+
         LOG_INF("Starting up VSLAM system...");
         slam_system_->startup();
         LOG_INF("VSLAM system started successfully.");
+
+        if (vslam_config_.loadConfig.loadMapDatabase)
+        {
+            slam_system_->disable_mapping_module();
+            LOG_INF("Mapping module disabled for localization-only mode.");
+        }
 
         is_initialized_ = true;
     }
