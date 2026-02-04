@@ -25,15 +25,21 @@ public:
 private:
     const config::VslamAdapterConfig &vslam_config_;
     std::shared_ptr<stella_vslam::system> slam_system_ = nullptr;
-    std::shared_ptr<pangolin_viewer::viewer> viewer_;
+    std::unique_ptr<pangolin_viewer::viewer> viewer_ = nullptr;
     std::thread viewer_thread_;
 
     bool is_initialized_ = false;
+    bool is_able_to_save_ = false;
+
+    void makeOutputDirectory();
+    bool initializeViewer();
 
     domain::model::Pose feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
     domain::model::Pose feedStereoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
     domain::model::Pose feedRgbdFrame(const domain::model::ImagePacket &image, uint64_t timestamp);
 
     domain::model::Pose convertStellaPoseToDomainPose(const std::shared_ptr<stella_vslam::Mat44_t> &raw_pose);
+
+    bool saveResults();
 };
 } // namespace vp::adapter::out

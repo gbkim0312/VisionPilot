@@ -5,6 +5,7 @@
 #include "pose.hpp"
 #include "stella_vslam/config.h"
 #include <exception>
+#include <memory>
 #include <opencv2/imgcodecs.hpp>
 
 #include "gaia_dir.hpp"
@@ -38,15 +39,14 @@ StellaVslamAdapterImpl::StellaVslamAdapterImpl(const config::VslamAdapterConfig 
     : vslam_config_{vslam_config}
 {
     LOG_TRA("");
+
+    this->makeOutputDirectory();
 }
 
 StellaVslamAdapterImpl::~StellaVslamAdapterImpl()
 {
     LOG_TRA("");
-    if (slam_system_)
-    {
-        slam_system_->shutdown();
-    }
+    this->deinitialize();
 }
 
 bool StellaVslamAdapterImpl::initialize()
@@ -69,19 +69,12 @@ bool StellaVslamAdapterImpl::initialize()
         slam_system_ = std::make_shared<stella_vslam::system>(config, vslam_config_.vocabPath);
         LOG_INF("VSLAM system created successfully.");
 
-        if (vslam_config_.useInternalViewer)
+        if (vslam_config_.useInternalViewer && !this->initializeViewer())
         {
-            LOG_INF("Internal viewer is enabled in the configuration. However, StellaVSLAM Adapter uses Pangolin Viewer externally.");
-            auto yaml_node = YAML::LoadFile(vslam_config_.vslamConfigFilePath);
-            LOG_INF("Setting up Pangolin Viewer...");
-            auto frame_publisher = slam_system_->get_frame_publisher();
-            auto map_publisher = slam_system_->get_map_publisher();
-            viewer_ = std::make_shared<pangolin_viewer::viewer>(yaml_node, slam_system_, frame_publisher, map_publisher);
-
-            viewer_thread_ = std::thread([this]()
-                                         { viewer_->run(); });
+            LOG_WRN("Failed to initialize internal viewer.");
         }
 
+        // Load map database if specified
         LOG_INF("Starting up VSLAM system...");
         slam_system_->startup();
         LOG_INF("VSLAM system started successfully.");
@@ -119,77 +112,77 @@ domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePac
     }
 }
 
-domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
+void StellaVslamAdapterImpl::makeOutputDirectory()
 {
     LOG_TRA("");
 
-    const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
-    if (mono_payload == nullptr)
+    if (vslam_config_.saveConfig.empty())
     {
-        THROWLOG(SysException, "Invalid image payload for Mono VSLAM Adapter. Check VideoLoader configuration.");
-    }
-
-    const auto rows = mono_payload->frame.height;
-    const auto cols = mono_payload->frame.width;
-    const auto channels = mono_payload->frame.channels;
-    auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
-
-    cv::Mat img(rows, cols, type, const_cast<uint8_t *>(mono_payload->frame.data.data())); // NOLINT: OPENCV
-
-    if (img.empty())
-    {
-        LOG_ERR("Failed to decode frame at ts: {}", timestamp);
-        return domain::model::Pose{};
-    }
-
-    constexpr auto kMicroSecondsInSecond = 1000000;
-    double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
-
-    LOG_DBG("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, timestamp, channels == 3 ? "true" : "false", time_in_seconds);
-
-    auto raw_pose = slam_system_->feed_monocular_frame(img, time_in_seconds);
-    return this->convertStellaPoseToDomainPose(raw_pose);
-}
-
-bool StellaVslamAdapterImpl::deinitialize()
-{
-    LOG_TRA("Stopping VSLAM Adapter...");
-
-    if (!is_initialized_)
-    {
-        LOG_WRN("VSLAM Adapter is not initialized.");
-        return true;
+        LOG_INF("No save configurations provided. Skipping output directory creation.");
+        return;
     }
 
     for (const auto &save_config : vslam_config_.saveConfig)
     {
-        auto dir_path = save_config.path.substr(0, save_config.path.find_last_of("/\\"));
-        if (!vp::isDirExist(dir_path))
+        const auto &output_path = save_config.path;
+        const auto dir_path = save_config.path.substr(0, save_config.path.find_last_of("/\\"));
+
+        if (vp::isDirExist(dir_path))
         {
-            vp::makeDir(dir_path);
+            continue;
         }
 
-        switch (save_config.saveTypes)
+        try
         {
-        case config::SaveType::MAP_DATABASE:
-            LOG_INF("Saving VSLAM map to: {}", save_config.path);
-            slam_system_->save_map_database(save_config.path);
-            LOG_INF("VSLAM map saved successfully.");
-            break;
-        case config::SaveType::FULL_TRAJECTORY:
-            LOG_INF("Saving VSLAM trajectory to: {}", save_config.path);
-            slam_system_->save_frame_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
-            LOG_INF("VSLAM trajectory saved successfully.");
-            break;
-        case config::SaveType::KEYFRAME_TRAJECTORY:
-            LOG_INF("Saving VSLAM keyframe trajectory to: {}", save_config.path);
-            slam_system_->save_keyframe_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
-            LOG_INF("VSLAM keyframe trajectory saved successfully.");
-            break;
-        default:
-            LOG_WRN("Unknown SaveType encountered during VSLAM shutdown.");
-            break;
+            LOG_INF("Creating output directory: {}", dir_path);
+            vp::makeDirRecursive(dir_path);
         }
+        catch (const std::exception &e)
+        {
+            LOG_ERR("Failed to create output directory ({}): {}. Stella VSLAM Adapter may not save outputs correctly.", dir_path, e.what());
+        }
+    }
+
+    is_able_to_save_ = true;
+}
+
+bool StellaVslamAdapterImpl::initializeViewer()
+{
+    LOG_TRA("");
+
+    try
+    {
+        LOG_INF("Internal viewer is enabled. Setting up Pangolin Viewer...");
+        auto yaml_node = YAML::LoadFile(vslam_config_.vslamConfigFilePath);
+        auto frame_publisher = slam_system_->get_frame_publisher();
+        auto map_publisher = slam_system_->get_map_publisher();
+        viewer_ = std::make_unique<pangolin_viewer::viewer>(yaml_node, slam_system_, frame_publisher, map_publisher);
+
+        viewer_thread_ = std::thread([this]()
+                                     { viewer_->run(); });
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERR("Failed to initialize internal viewer: {}", e.what());
+        return false;
+    }
+    return true;
+}
+
+bool StellaVslamAdapterImpl::deinitialize()
+{
+    LOG_TRA("");
+
+    if (!is_initialized_)
+    {
+        LOG_INF("VSLAM Adapter is already deinitialized or not yet initialized.");
+        return true;
+    }
+    LOG_INF("Stopping VSLAM Adapter...");
+
+    if (is_able_to_save_)
+    {
+        this->saveResults();
     }
 
     if (viewer_ != nullptr)
@@ -198,7 +191,7 @@ bool StellaVslamAdapterImpl::deinitialize()
 
         if (viewer_thread_.joinable())
         {
-            viewer_thread_.join(); // 2. 뷰어 루프가 완전히 끝날 때까지 대기
+            viewer_thread_.join();
             LOG_INF("Viewer thread joined.");
         }
         viewer_.reset();
@@ -222,6 +215,40 @@ bool StellaVslamAdapterImpl::deinitialize()
     return true;
 }
 
+domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
+{
+    LOG_TRA("");
+
+    const auto *mono_payload = std::get_if<domain::model::MonoImagePacket>(&image.payload);
+    if (mono_payload == nullptr)
+    {
+        LOG_ERR("Invalid image payload for Mono VSLAM Adapter. Disabling VSLAM. Check VideoLoader configuration.");
+        this->deinitialize();
+        return {};
+    }
+
+    const auto rows = mono_payload->frame.height;
+    const auto cols = mono_payload->frame.width;
+    const auto channels = mono_payload->frame.channels;
+    auto type = channels == 3 ? CV_8UC3 : CV_8UC1; // NOLINT: OPENCV
+
+    cv::Mat img(rows, cols, type, const_cast<uint8_t *>(mono_payload->frame.data.data())); // NOLINT: OPENCV
+
+    if (img.empty())
+    {
+        LOG_ERR("Failed to decode frame at ts: {}", timestamp);
+        return domain::model::Pose{};
+    }
+
+    constexpr auto kMicroSecondsInSecond = 1000000;
+    double time_in_seconds = static_cast<double>(timestamp) / kMicroSecondsInSecond;
+
+    LOG_TRA("Frame size: {}x{}, Timestamp: {}, | color: {}, Time (s): {:.6f}", cols, rows, timestamp, channels == 3 ? "true" : "false", time_in_seconds);
+
+    auto raw_pose = slam_system_->feed_monocular_frame(img, time_in_seconds);
+    return this->convertStellaPoseToDomainPose(raw_pose);
+}
+
 domain::model::Pose StellaVslamAdapterImpl::feedStereoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
 {
     LOG_TRA("");
@@ -229,7 +256,9 @@ domain::model::Pose StellaVslamAdapterImpl::feedStereoFrame(const domain::model:
     const auto *stereo_payload = std::get_if<domain::model::StereoImagePacket>(&image.payload);
     if (stereo_payload == nullptr)
     {
-        THROWLOG(SysException, "Invalid image payload for Stereo VSLAM Adapter. Check VideoLoader configuration.");
+        LOG_ERR("Invalid image payload for Stereo VSLAM Adapter. Disabling VSLAM. Check VideoLoader configuration.");
+        this->deinitialize();
+        return {};
     }
 
     const auto &left_frame = stereo_payload->left;
@@ -296,5 +325,37 @@ domain::model::Pose StellaVslamAdapterImpl::convertStellaPoseToDomainPose(const 
     }
 
     return pose;
+}
+
+bool StellaVslamAdapterImpl::saveResults()
+{
+    LOG_TRA("");
+
+    for (const auto &save_config : vslam_config_.saveConfig)
+    {
+        switch (save_config.saveTypes)
+        {
+        case config::SaveType::MAP_DATABASE:
+            LOG_INF("Saving VSLAM map to: {}", save_config.path);
+            slam_system_->save_map_database(save_config.path);
+            LOG_INF("VSLAM map saved successfully.");
+            break;
+        case config::SaveType::FULL_TRAJECTORY:
+            LOG_INF("Saving VSLAM trajectory to: {}", save_config.path);
+            slam_system_->save_frame_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
+            LOG_INF("VSLAM trajectory saved successfully.");
+            break;
+        case config::SaveType::KEYFRAME_TRAJECTORY:
+            LOG_INF("Saving VSLAM keyframe trajectory to: {}", save_config.path);
+            slam_system_->save_keyframe_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
+            LOG_INF("VSLAM keyframe trajectory saved successfully.");
+            break;
+        default:
+            LOG_WRN("Unknown SaveType encountered during VSLAM save operation.");
+            break;
+        }
+    }
+
+    return true;
 }
 } // namespace vp::adapter::out
