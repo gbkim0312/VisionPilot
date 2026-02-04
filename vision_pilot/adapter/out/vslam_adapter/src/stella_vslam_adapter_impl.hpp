@@ -1,6 +1,7 @@
 #pragma once
 
 #include "image.hpp"
+#include "pangolin_viewer/viewer.h"
 #include "pose.hpp"
 #include "stella_vslam_adapter.hpp"
 #include "vslam_config.hpp"
@@ -23,6 +24,7 @@ public:
 private:
     const config::VslamAdapterConfig &vslam_config_;
     std::shared_ptr<stella_vslam::system> slam_system_ = nullptr;
+    std::shared_ptr<pangolin_viewer::viewer> viewer_;
     bool is_initialized_ = false;
 
     domain::model::Pose feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);

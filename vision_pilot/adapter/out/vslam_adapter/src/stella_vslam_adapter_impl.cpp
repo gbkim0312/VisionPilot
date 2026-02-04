@@ -7,6 +7,9 @@
 #include <exception>
 #include <opencv2/imgcodecs.hpp>
 
+#include "stella_vslam/publish/frame_publisher.h"
+#include "stella_vslam/publish/map_publisher.h"
+
 namespace
 {
 std::string convertSaveFormatToString(std::optional<vp::config::SaveFormat> format)
@@ -65,6 +68,17 @@ bool StellaVslamAdapterImpl::initialize()
         LOG_INF("Creating VSLAM system...");
         slam_system_ = std::make_shared<stella_vslam::system>(config, vslam_config_.vocabPath);
         LOG_INF("VSLAM system created successfully.");
+
+        LOG_INF("Setting up Pangolin Viewer...");
+        auto frame_publisher = slam_system_->get_frame_publisher();
+        auto map_publisher = slam_system_->get_map_publisher();
+        viewer_ = std::make_shared<pangolin_viewer::viewer>(config, slam_system_.get(), frame_publisher, map_publisher);
+
+        std::thread([this]()
+                    { viewer_->run(); })
+            .detach();
+
+        LOG_INF("Pangolin Viewer started.");
 
         LOG_INF("Starting up VSLAM system...");
         slam_system_->startup();
@@ -170,7 +184,14 @@ bool StellaVslamAdapterImpl::deinitialize()
         }
     }
 
-    if (slam_system_)
+    if (viewer_ != nullptr)
+    {
+        viewer_->request_terminate();
+        viewer_.reset();
+        LOG_INF("Pangolin Viewer terminated.");
+    }
+
+    if (slam_system_ != nullptr)
     {
         LOG_INF("Shutting down VSLAM system...");
         slam_system_->shutdown();

@@ -5,15 +5,16 @@ set(_INCLUDE_PRIVATE src)
 
 set(_LINK_PUBLIC_LIBRARIES vp::port_out vp::config)
 set(_LINK_PRIVATE_LIBRARIES
-    stella_vslam::stella_vslam
-    ${OpenCV_LIBS}
+  stella_vslam::stella_vslam
+  pangolin_viewer::pangolin_viewer
+  ${OpenCV_LIBS}
 )
 
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
 
 add_library(${PROJECT_NAME} STATIC
-    ${ALL_DEPS})
+  ${ALL_DEPS})
 
 add_library(vp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
@@ -51,4 +52,4 @@ target_link_libraries(
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_test)
 
 install(TARGETS ${PROJECT_NAME}_test RUNTIME DESTINATION sample
-                                     COMPONENT vp_debugs)
+  COMPONENT vp_debugs)
