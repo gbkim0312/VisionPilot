@@ -22,7 +22,7 @@ add_library(${PROJECT_NAME} STATIC
 
 add_library(vp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GLES)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GLES)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CLANG_TIDY "")
 
@@ -44,7 +44,7 @@ set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgu
 
 add_executable(${PROJECT_NAME}_test ${ALL_DEPS})
 
-target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
+#target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
 
 target_include_directories(
   ${PROJECT_NAME}_test

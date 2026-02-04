@@ -17,8 +17,5 @@ public:
     bool initialize();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
     bool deinitialize();
-
-private:
-    std::unique_ptr<OrbSlamAdapterImpl> impl_;
 };
 } // namespace vp::adapter::out

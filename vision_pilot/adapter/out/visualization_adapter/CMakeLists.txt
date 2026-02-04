@@ -3,47 +3,55 @@ project(adapter_visualization)
 cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
 
-find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Pangolin REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(_INCLUDE_PUBLIC include)
-set(_INCLUDE_PRIVATE src ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
+set(_INCLUDE_PRIVATE
+    src
+    ${OPENGL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIRS}
+    ${Pangolin_INCLUDE_DIRS}
+)
 
-set(_LINK_PUBLIC_LIBRARIES vp::model vp::config vp::port_out)
+set(_LINK_PUBLIC_LIBRARIES
+    vp::model
+    vp::config
+    vp::port_out
+)
+
 set(_LINK_PRIVATE_LIBRARIES
-    stella_vslam::stella_vslam
     opencv_core
     opencv_imgproc
     opencv_highgui
     opencv_imgcodecs
 
-    OpenGL::GL
-    OpenGL::GLU
-    GLEW::GLEW
+    pango_core
+    pango_opengl
+    pango_display
+    pango_windowing
 
+    OpenGL::GL
+    GLEW::GLEW
     Eigen3::Eigen
 )
 
-
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
-set(ALL_DEPS ${ALL_DEPS} ${DEPS})
-
-add_library(${PROJECT_NAME} STATIC
-    ${ALL_DEPS})
-
+add_library(${PROJECT_NAME} STATIC ${DEPS})
 add_library(vp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GLES)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CLANG_TIDY "")
 
 target_include_directories(${PROJECT_NAME}
-  PUBLIC ${_INCLUDE_PUBLIC}
-  PRIVATE ${_INCLUDE_PRIVATE}
+    PUBLIC  ${_INCLUDE_PUBLIC}
+    PRIVATE ${_INCLUDE_PRIVATE}
 )
+
 target_link_libraries(${PROJECT_NAME}
-  PUBLIC ${_LINK_PUBLIC_LIBRARIES}
-  PRIVATE ${_LINK_PRIVATE_LIBRARIES}
+    PUBLIC  ${_LINK_PUBLIC_LIBRARIES}
+    PRIVATE ${_LINK_PRIVATE_LIBRARIES}
 )
 
 # 테스트 설정
@@ -51,11 +59,11 @@ file(GLOB DEPS CONFIGURE_DEPENDS "gtest/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
 
 set(_INCLUDE_PRIVATE ${_INCLUDE_PRIVATE} gtest)
-set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgui)
+set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgui adapter_visualization)
 
 add_executable(${PROJECT_NAME}_test ${ALL_DEPS})
 
-target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
+#target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
 
 target_include_directories(
   ${PROJECT_NAME}_test

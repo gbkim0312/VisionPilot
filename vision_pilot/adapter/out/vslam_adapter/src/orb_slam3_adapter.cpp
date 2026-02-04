@@ -1,7 +1,6 @@
 #include "orb_slam3_adapter.hpp"
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
-#include "orb_slam3_adapter_impl.hpp"
 
 namespace vp::adapter::out
 {
@@ -14,23 +13,27 @@ OrbSlamAdapter::OrbSlamAdapter(const config::VslamAdapterConfig &config)
         THROWLOG(SysException, "OrbSlamAdapter initialized with unsupported VSLAM type.");
     }
 
-    impl_ = std::make_unique<OrbSlamAdapterImpl>(config);
+    LOG_WRN("OrbSlamAdapter is under development. Functionality may be limited.");
 }
 
 OrbSlamAdapter::~OrbSlamAdapter() = default;
 
 bool OrbSlamAdapter::initialize()
 {
-    return impl_->initialize();
+    LOG_TRA("");
+
+    return true;
 }
 
-domain::model::Pose OrbSlamAdapter::update(const domain::model::ImagePacket &image, uint64_t timestamp)
+domain::model::Pose OrbSlamAdapter::update(const domain::model::ImagePacket & /*image*/, uint64_t /*timestamp*/)
 {
-    return impl_->update(image, timestamp);
+    return {};
 }
 
 bool OrbSlamAdapter::deinitialize()
 {
-    return impl_->deinitialize();
+    LOG_TRA("");
+
+    return true;
 }
 } // namespace vp::adapter::out
