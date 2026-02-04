@@ -146,30 +146,4 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamAdapterConfig,
                                    loadConfig,
                                    saveConfig,
                                    useInternalViewer)
-
-enum class VslamViewerType
-{
-    NONE = 0,
-    PANGOLIN,
-    OPENCV,
-    SOCKET
-};
-
-NLOHMANN_JSON_SERIALIZE_ENUM(VslamViewerType,
-                             {
-                                 {VslamViewerType::NONE, "none"},
-                                 {VslamViewerType::PANGOLIN, "pangolin"},
-                                 {VslamViewerType::OPENCV, "opencv"},
-                                 {VslamViewerType::SOCKET, "socket"},
-                             })
-
-struct VslamViewerConfig
-{
-    VslamViewerType viewerType = VslamViewerType::OPENCV;
-};
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamViewerConfig,
-                                   viewerType)
-// 설정 항목 추가 예정
-
 } // namespace vp::config

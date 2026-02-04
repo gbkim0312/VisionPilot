@@ -7,7 +7,7 @@ namespace vp::adapter::out
 class SocketViewerAdapterImpl
 {
 public:
-    SocketViewerAdapterImpl(const config::VslamViewerConfig &config);
+    SocketViewerAdapterImpl(const config::ViewerConfig &config);
     ~SocketViewerAdapterImpl();
 
     bool start() const;
@@ -16,7 +16,7 @@ public:
     void render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame);
 
 private:
-    const config::VslamViewerConfig &config_;
+    const config::ViewerConfig &config_;
     int socket_fd_ = -1;
     bool is_running_ = false;
 };

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "image.hpp"
+#include "viewer_config.hpp"
 #include "visualization_port.hpp"
-#include "vslam_config.hpp"
 
 namespace vp::adapter::out
 {
@@ -11,7 +11,7 @@ class SocketViewerAdapterImpl;
 class SocketViewerAdapter : public port::out::VisualizationPort
 {
 public:
-    SocketViewerAdapter(const config::VslamViewerConfig &config);
+    SocketViewerAdapter(const config::ViewerConfig &config);
     ~SocketViewerAdapter();
     bool start();
     bool stop();

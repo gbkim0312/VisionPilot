@@ -40,7 +40,7 @@
             }
         ]
     },
-    "vslamViewerConfig": {
+    "viewerConfig": {
         "viewerType": "opencv" // [pangolin|opencv|socket|none]
     },
     "detectionConfig": {

@@ -89,7 +89,7 @@ protected:
         return packet;
     }
 
-    config::VslamViewerConfig vslam_viewer_config_;
+    config::ViewerConfig vslam_viewer_config_;
     config::YoloConfig yolo_config_;
 
     std::vector<std::string> image_filenames_;

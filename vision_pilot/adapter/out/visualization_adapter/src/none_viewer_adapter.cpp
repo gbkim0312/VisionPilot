@@ -1,11 +1,12 @@
 #include "none_viewer_adapter.hpp"
 #include "detection.hpp"
 #include "gaia_log.hpp"
+#include "viewer_config.hpp"
 #include <gaia_exception.hpp>
 
 namespace vp::adapter::out
 {
-NoneViewerAdapter::NoneViewerAdapter(const config::VslamViewerConfig &config)
+NoneViewerAdapter::NoneViewerAdapter(const config::ViewerConfig &config)
     : config_(config)
 {
     LOG_TRA("");
@@ -19,7 +20,7 @@ bool NoneViewerAdapter::start() const
 {
     LOG_TRA("");
 
-    if (config_.viewerType != config::VslamViewerType::NONE)
+    if (config_.viewerType != config::ViewerType::NONE)
     {
         LOG_WRN("Viewer type is not NONE, but NoneViewerAdapter is used.");
     }

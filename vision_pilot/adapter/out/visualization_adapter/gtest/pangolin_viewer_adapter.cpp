@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "pangolin_viewer_adapter.hpp"
-#include "vslam_config.hpp"
+#include "viewer_config.hpp"
 #include <cstdlib>
 #include <thread>
 
@@ -23,8 +23,8 @@ protected:
 
 TEST_F(PangolinViewerAdapterTest, StartAndStopDoesNotCrash)
 {
-    config::VslamViewerConfig cfg{};
-    cfg.viewerType = config::VslamViewerType::PANGOLIN;
+    config::ViewerConfig cfg{};
+    cfg.viewerType = config::ViewerType::PANGOLIN;
 
     PangolinViewerAdapter viewer(cfg);
 

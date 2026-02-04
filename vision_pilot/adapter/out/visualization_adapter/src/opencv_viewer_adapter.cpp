@@ -2,13 +2,14 @@
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "opencv_viewer_adapter_impl.hpp"
+#include "viewer_config.hpp"
 
 namespace vp::adapter::out
 {
-OpenCVViewerAdapter::OpenCVViewerAdapter(const config::VslamViewerConfig &config)
+OpenCVViewerAdapter::OpenCVViewerAdapter(const config::ViewerConfig &config)
 {
     LOG_TRA("");
-    if (config.viewerType != config::VslamViewerType::OPENCV)
+    if (config.viewerType != config::ViewerType::OPENCV)
     {
         THROWLOG(SysException, "Type mismatch: OpenCVViewerAdapter can be used only with OPENCV viewer type.");
     }

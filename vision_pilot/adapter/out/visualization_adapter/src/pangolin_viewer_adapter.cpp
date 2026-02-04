@@ -2,13 +2,14 @@
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "pangolin_viewer_adapter_impl.hpp"
+#include "viewer_config.hpp"
 
 namespace vp::adapter::out
 {
-PangolinViewerAdapter::PangolinViewerAdapter(const config::VslamViewerConfig &config)
+PangolinViewerAdapter::PangolinViewerAdapter(const config::ViewerConfig &config)
 {
     LOG_TRA("");
-    if (config.viewerType != config::VslamViewerType::PANGOLIN)
+    if (config.viewerType != config::ViewerType::PANGOLIN)
     {
         THROWLOG(SysException, "Type mismatch: PangolinViewerAdapter can be used only with PANGOLIN viewer type.");
     }

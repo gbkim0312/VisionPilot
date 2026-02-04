@@ -5,7 +5,7 @@
 
 namespace vp::adapter::out
 {
-PangolinViewerAdapterImpl::PangolinViewerAdapterImpl(const config::VslamViewerConfig &config)
+PangolinViewerAdapterImpl::PangolinViewerAdapterImpl(const config::ViewerConfig &config)
     : config_{config}, pose_history_{}
 {
     LOG_TRA("");

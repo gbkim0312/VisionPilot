@@ -3,7 +3,7 @@
 #include "detection.hpp"
 #include "image.hpp"
 #include "pose.hpp"
-#include "vslam_config.hpp"
+#include "viewer_config.hpp"
 #include <pangolin/pangolin.h>
 #include <vector>
 
@@ -12,7 +12,7 @@ namespace vp::adapter::out
 class PangolinViewerAdapterImpl
 {
 public:
-    explicit PangolinViewerAdapterImpl(const config::VslamViewerConfig &config);
+    explicit PangolinViewerAdapterImpl(const config::ViewerConfig &config);
     ~PangolinViewerAdapterImpl();
 
     bool start();
@@ -27,7 +27,7 @@ private:
     void drawCurrentPose(const domain::model::Pose &pose);
     void drawGrid();
 
-    config::VslamViewerConfig config_;
+    config::ViewerConfig config_;
     bool is_running_ = false;
 
     std::string window_name_ = "Vision Pilot - Pangolin Viewer";

@@ -2,8 +2,8 @@
 #pragma once
 
 #include "image.hpp"
+#include "viewer_config.hpp"
 #include "visualization_port.hpp"
-#include "vslam_config.hpp"
 
 namespace vp::adapter::out
 {
@@ -12,7 +12,7 @@ class OpenCVViewerAdapterImpl;
 class OpenCVViewerAdapter : public port::out::VisualizationPort
 {
 public:
-    OpenCVViewerAdapter(const config::VslamViewerConfig &config);
+    OpenCVViewerAdapter(const config::ViewerConfig &config);
     ~OpenCVViewerAdapter();
     bool start();
     bool stop();

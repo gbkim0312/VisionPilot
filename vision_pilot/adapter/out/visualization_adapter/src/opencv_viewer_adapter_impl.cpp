@@ -2,12 +2,13 @@
 #include "opencv_viewer_adapter_impl.hpp"
 #include "gaia_exception.hpp"
 #include "gaia_log.hpp"
+#include "viewer_config.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 namespace vp::adapter::out
 {
-OpenCVViewerAdapterImpl::OpenCVViewerAdapterImpl(const config::VslamViewerConfig &config)
+OpenCVViewerAdapterImpl::OpenCVViewerAdapterImpl(const config::ViewerConfig &config)
     : config_{config}
 {
     LOG_TRA("OpenCVViewerAdapterImpl Instance Created");
@@ -22,7 +23,7 @@ OpenCVViewerAdapterImpl::~OpenCVViewerAdapterImpl()
 bool OpenCVViewerAdapterImpl::start()
 {
     LOG_INF("Starting OpenCV Viewer...");
-    if (config_.viewerType != config::VslamViewerType::OPENCV)
+    if (config_.viewerType != config::ViewerType::OPENCV)
     {
         THROWLOG(SysException, "Type mismatch: OpenCVViewerAdapterImpl can be used only with OPENCV viewer type.");
     }

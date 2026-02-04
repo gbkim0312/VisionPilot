@@ -28,23 +28,23 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
         THROWLOG(SysException, "Unsupported VSLAM type specified in configuration.");
     }
 
-    switch (config_.vslamViewerConfig.viewerType)
+    switch (config_.viewerConfig.viewerType)
     {
-    case config::VslamViewerType::NONE:
+    case config::ViewerType::NONE:
         LOG_INF("No VSLAM viewer selected.");
-        none_viewer_adapter_ = std::make_unique<vp::adapter::out::NoneViewerAdapter>(config_.vslamViewerConfig);
+        none_viewer_adapter_ = std::make_unique<vp::adapter::out::NoneViewerAdapter>(config_.viewerConfig);
         break;
-    case config::VslamViewerType::OPENCV:
+    case config::ViewerType::OPENCV:
         LOG_INF("OpenCV VSLAM viewer selected.");
-        opencv_viewer_adapter_ = std::make_unique<vp::adapter::out::OpenCVViewerAdapter>(config_.vslamViewerConfig);
+        opencv_viewer_adapter_ = std::make_unique<vp::adapter::out::OpenCVViewerAdapter>(config_.viewerConfig);
         break;
-    case config::VslamViewerType::PANGOLIN:
+    case config::ViewerType::PANGOLIN:
         LOG_INF("Pangolin VSLAM viewer selected.");
-        pangolin_viewer_adapter_ = std::make_unique<vp::adapter::out::PangolinViewerAdapter>(config_.vslamViewerConfig);
+        pangolin_viewer_adapter_ = std::make_unique<vp::adapter::out::PangolinViewerAdapter>(config_.viewerConfig);
         break;
-    case config::VslamViewerType::SOCKET:
+    case config::ViewerType::SOCKET:
         LOG_INF("Socket VSLAM viewer selected.");
-        socket_viewer_adapter_ = std::make_unique<vp::adapter::out::SocketViewerAdapter>(config_.vslamViewerConfig);
+        socket_viewer_adapter_ = std::make_unique<vp::adapter::out::SocketViewerAdapter>(config_.viewerConfig);
         break;
     default:
         THROWLOG(SysException, "Unsupported VSLAM viewer type specified in configuration.");
@@ -68,18 +68,18 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
 void OutAdapterRegistry::startExternalAdapters()
 {
     LOG_TRA("");
-    switch (config_.vslamViewerConfig.viewerType)
+    switch (config_.viewerConfig.viewerType)
     {
-    case config::VslamViewerType::NONE:
+    case config::ViewerType::NONE:
         none_viewer_adapter_->start();
         break;
-    case config::VslamViewerType::OPENCV:
+    case config::ViewerType::OPENCV:
         opencv_viewer_adapter_->start();
         break;
-    case config::VslamViewerType::PANGOLIN:
+    case config::ViewerType::PANGOLIN:
         pangolin_viewer_adapter_->start();
         break;
-    case config::VslamViewerType::SOCKET:
+    case config::ViewerType::SOCKET:
         socket_viewer_adapter_->start();
         break;
     default:
@@ -144,18 +144,18 @@ void OutAdapterRegistry::stopExternalAdapters()
         break;
     }
 
-    switch (config_.vslamViewerConfig.viewerType)
+    switch (config_.viewerConfig.viewerType)
     {
-    case config::VslamViewerType::NONE:
+    case config::ViewerType::NONE:
         none_viewer_adapter_->stop();
         break;
-    case config::VslamViewerType::OPENCV:
+    case config::ViewerType::OPENCV:
         opencv_viewer_adapter_->stop();
         break;
-    case config::VslamViewerType::PANGOLIN:
+    case config::ViewerType::PANGOLIN:
         pangolin_viewer_adapter_->stop();
         break;
-    case config::VslamViewerType::SOCKET:
+    case config::ViewerType::SOCKET:
         socket_viewer_adapter_->stop();
         break;
     default:
@@ -180,15 +180,15 @@ vp::port::out::LocalizationPort &OutAdapterRegistry::getLocalizationPort()
 
 vp::port::out::VisualizationPort &OutAdapterRegistry::getVisualizationPort()
 {
-    switch (config_.vslamViewerConfig.viewerType)
+    switch (config_.viewerConfig.viewerType)
     {
-    case config::VslamViewerType::NONE:
+    case config::ViewerType::NONE:
         return *none_viewer_adapter_;
-    case config::VslamViewerType::OPENCV:
+    case config::ViewerType::OPENCV:
         return *opencv_viewer_adapter_;
-    case config::VslamViewerType::PANGOLIN:
+    case config::ViewerType::PANGOLIN:
         return *pangolin_viewer_adapter_;
-    case config::VslamViewerType::SOCKET:
+    case config::ViewerType::SOCKET:
         return *socket_viewer_adapter_;
     default:
         THROWLOG(SysException, "Unsupported VSLAM viewer type. Cannot provide VisualizationPort.");

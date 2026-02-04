@@ -4,7 +4,7 @@
 
 namespace vp::adapter::out
 {
-SocketViewerAdapterImpl::SocketViewerAdapterImpl(const config::VslamViewerConfig &config)
+SocketViewerAdapterImpl::SocketViewerAdapterImpl(const config::ViewerConfig &config)
     : config_(config)
 {
 }
