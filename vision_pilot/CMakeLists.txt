@@ -56,20 +56,22 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # CCache 설정
 find_program(CCACHE_PROGRAM ccache)
+
 if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
 find_program(CLANG_TIDY_EXE NAMES "clang-tidy-18" "clang-tidy")
+
 if(NOT CLANG_TIDY_EXE)
-    message(FATAL_ERROR "clang-tidy not found! Static analysis will be skipped."  )
+    message(FATAL_ERROR "clang-tidy not found! Static analysis will be skipped.")
 endif()
 
 find_program(CLANG_EXE NAMES "clang-18" "clang")
+
 if(NOT CLANG_EXE)
     message(FATAL_ERROR "clang compiler not found! Static analysis will be skipped.")
 endif()
-
 
 # --- 정적 분석 설정 ---
 include(FetchContent)
@@ -78,6 +80,7 @@ include(ClangTidyFlags)
 
 # --- 1. nlohmann_json (Header Only) ---
 find_package(nlohmann_json CONFIG QUIET)
+
 if(NOT TARGET nlohmann_json::nlohmann_json)
     FetchContent_Declare(nlohmann_json GIT_REPOSITORY https://github.com/nlohmann/json.git GIT_TAG v3.11.3)
     FetchContent_MakeAvailable(nlohmann_json)
@@ -107,15 +110,16 @@ add_subdirectory_with_static_analysis(infrastructure)
 add_subdirectory_with_static_analysis(adapter)
 add_subdirectory_with_static_analysis(application)
 add_subdirectory_with_static_analysis(assembly)
+
 # --- 타겟 생성 및 링크 ---
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        vp::assembly
-        vp::config
-        ${OpenCV_LIBS}
-        stella_vslam::stella_vslam  # 스텔라 라이브러리 타겟 명칭 확인 필요
+    vp::assembly
+    vp::config
+    ${OpenCV_LIBS}
+    stella_vslam::stella_vslam # 스텔라 라이브러리 타겟 명칭 확인 필요
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -130,7 +134,7 @@ install(TARGETS ${PROJECT_NAME}
 
 # 2. 직접 만든 서브 모듈 라이브러리들 설치 (vp::config, vp::adapter 등)
 # 하위 CMakeLists.txt에서 이미 정의되어 있다면 여기서 타겟 이름으로 모아서 설치 가능
-install(TARGETS config event vp_frame_loader port_in port_out assembly gaia adapter_vslam
+install(TARGETS config event vp_frame_loader port_in port_out assembly gaia adapter_vslam miniz
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     COMPONENT vp_libraries
