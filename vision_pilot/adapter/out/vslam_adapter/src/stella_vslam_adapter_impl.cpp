@@ -218,10 +218,10 @@ domain::model::Pose StellaVslamAdapterImpl::convertStellaPoseToDomainPose(const 
         pose.x = trans.x();
         pose.y = trans.y();
         pose.z = trans.z();
-        pose.qw = q.w();
-        pose.qx = q.x();
-        pose.qy = q.y();
-        pose.qz = q.z();
+        pose.qw = q.w(); // NOLINT: eigen-alignment
+        pose.qx = q.x(); // NOLINT: eigen-alignment
+        pose.qy = q.y(); // NOLINT: eigen-alignment
+        pose.qz = q.z(); // NOLINT: eigen-alignment
         pose.is_lost = false;
 
         LOG_DBG("Pose: Position({:.3f}, {:.3f}, {:.3f}), Orientation({:.3f}, {:.3f}, {:.3f}, {:.3f})",

@@ -3,7 +3,7 @@
 #include "gaia_log.hpp"
 #include <csignal>
 #include <iostream>
-
+#include <thread>
 namespace
 {
 struct CliOptions

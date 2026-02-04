@@ -91,7 +91,7 @@ bool YOLOv8AdapterImpl::initialize()
         }
 
         // 워밍업
-        cv::Mat dummy = cv::Mat::zeros(config_.inputHeight, config_.inputWidth, CV_32FC3);
+        cv::Mat dummy = cv::Mat::zeros(config_.inputHeight, config_.inputWidth, CV_32FC3); // NOLINT: opencv
         cv::dnn::blobFromImage(dummy);
 
         LOG_INF("YOLOv8 initialized successfully.");
@@ -136,7 +136,7 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     std::visit([&](auto &&arg)
                {
         using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, vp::domain::model::MonoImagePacket>)
+        if constexpr (std::is_same_v<T, vp::domain::model::MonoImagePacket>) //NOLINT
         {
             raw_ptr = &arg.frame;
         }
@@ -151,7 +151,7 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     }
 
     // Raw -> Mat 변환
-    int type = (raw_ptr->channels == 3) ? CV_8UC3 : CV_8UC1;
+    int type = (raw_ptr->channels == 3) ? CV_8UC3 : CV_8UC1; // NOLINT: opencv
     cv::Mat frame(raw_ptr->height, raw_ptr->width, type, const_cast<uint8_t *>(raw_ptr->data.data()), raw_ptr->step);
 
     // RGB 변환
@@ -190,7 +190,7 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     int dh = (target_h - new_h) / 2;
 
     // 캔버스 생성
-    cv::Mat input_blob_img(target_h, target_w, CV_8UC3, cv::Scalar(114, 114, 114));
+    cv::Mat input_blob_img(target_h, target_w, CV_8UC3, cv::Scalar(114, 114, 114)); // NOLINT: opencv
 
     // 리사이즈된 이미지를 캔버스 중앙에 복사
     resized_img.copyTo(input_blob_img(cv::Rect(dw, dh, new_w, new_h)));

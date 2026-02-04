@@ -51,14 +51,14 @@ void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
         using T = std::decay_t<decltype(arg)>;
 
         // MonoImagePacket
-        if constexpr (std::is_same_v<T, domain::model::MonoImagePacket>)
+        if constexpr (std::is_same_v<T, domain::model::MonoImagePacket>) //NOLINT
         {
-            int type = (arg.frame.channels == 1) ? CV_8UC1 : CV_8UC3;
+            auto type = (arg.frame.channels == 1) ? CV_8UC1 : CV_8UC3; //NOLINT: opencv
             canvas = cv::Mat(arg.frame.height, arg.frame.width, type,
                              const_cast<uint8_t *>(arg.frame.data.data()))
                          .clone();
 
-            if (type == CV_8UC1)
+            if (type == CV_8UC1) //NOLINT: opencv
             {
                 cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
             }
@@ -66,7 +66,7 @@ void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
         // StereoImagePacket
         else if constexpr (std::is_same_v<T, domain::model::StereoImagePacket>)
         {
-            int type = (arg.left.channels == 1) ? CV_8UC1 : CV_8UC3;
+            auto type = (arg.left.channels == 1) ? CV_8UC1 : CV_8UC3; //NOLINT: opencv
             cv::Mat left_mat(arg.left.height, arg.left.width, type,
                              const_cast<uint8_t *>(arg.left.data.data()));
             cv::Mat right_mat(arg.right.height, arg.right.width, type,
@@ -74,7 +74,7 @@ void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
 
             cv::vconcat(left_mat, right_mat, canvas);
 
-            if (type == CV_8UC1)
+            if (type == CV_8UC1) //NOLINT: opencv
             {
                 cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
             }
