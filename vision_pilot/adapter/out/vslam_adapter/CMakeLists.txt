@@ -10,6 +10,8 @@ set(_LINK_PRIVATE_LIBRARIES
   ${OpenCV_LIBS}
 )
 
+find_package(pangolin_viewer REQUIRED)
+
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
 

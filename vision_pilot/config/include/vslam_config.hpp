@@ -133,7 +133,7 @@ struct VslamAdapterConfig
     VslamMethod method = VslamMethod::MONOCULAR;
     std::string vslamConfigFilePath; // VSLAM용 설정 파일 경로
     std::string vocabPath;           // VSLAM용 보캐뷸러리 파일 경로
-
+    bool useInternalViewer = false;
     LoadConfig loadConfig;
     std::vector<SaveConfig> saveConfig;
 };
@@ -144,7 +144,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamAdapterConfig,
                                    method,
                                    vocabPath,
                                    loadConfig,
-                                   saveConfig)
+                                   saveConfig,
+                                   useInternalViewer)
 
 enum class VslamViewerType
 {

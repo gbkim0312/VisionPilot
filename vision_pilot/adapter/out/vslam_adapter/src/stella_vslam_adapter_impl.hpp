@@ -8,6 +8,7 @@
 #include <memory>
 #include <stella_vslam/system.h>
 #include <stella_vslam/type.h>
+#include <thread>
 
 namespace vp::adapter::out
 {
@@ -25,6 +26,8 @@ private:
     const config::VslamAdapterConfig &vslam_config_;
     std::shared_ptr<stella_vslam::system> slam_system_ = nullptr;
     std::shared_ptr<pangolin_viewer::viewer> viewer_;
+    std::thread viewer_thread_;
+
     bool is_initialized_ = false;
 
     domain::model::Pose feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp);

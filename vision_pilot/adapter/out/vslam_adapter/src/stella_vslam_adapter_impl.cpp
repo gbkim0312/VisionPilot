@@ -7,7 +7,7 @@
 #include <exception>
 #include <opencv2/imgcodecs.hpp>
 
-#include "stella_vslam/publish/frame_publisher.h"
+#include "gaia_dir.hpp"
 #include "stella_vslam/publish/map_publisher.h"
 
 namespace
@@ -69,16 +69,18 @@ bool StellaVslamAdapterImpl::initialize()
         slam_system_ = std::make_shared<stella_vslam::system>(config, vslam_config_.vocabPath);
         LOG_INF("VSLAM system created successfully.");
 
-        LOG_INF("Setting up Pangolin Viewer...");
-        auto frame_publisher = slam_system_->get_frame_publisher();
-        auto map_publisher = slam_system_->get_map_publisher();
-        viewer_ = std::make_shared<pangolin_viewer::viewer>(config, slam_system_.get(), frame_publisher, map_publisher);
+        if (vslam_config_.useInternalViewer)
+        {
+            LOG_INF("Internal viewer is enabled in the configuration. However, StellaVSLAM Adapter uses Pangolin Viewer externally.");
+            auto yaml_node = YAML::LoadFile(vslam_config_.vslamConfigFilePath);
+            LOG_INF("Setting up Pangolin Viewer...");
+            auto frame_publisher = slam_system_->get_frame_publisher();
+            auto map_publisher = slam_system_->get_map_publisher();
+            viewer_ = std::make_shared<pangolin_viewer::viewer>(yaml_node, slam_system_, frame_publisher, map_publisher);
 
-        std::thread([this]()
-                    { viewer_->run(); })
-            .detach();
-
-        LOG_INF("Pangolin Viewer started.");
+            viewer_thread_ = std::thread([this]()
+                                         { viewer_->run(); });
+        }
 
         LOG_INF("Starting up VSLAM system...");
         slam_system_->startup();
@@ -161,6 +163,12 @@ bool StellaVslamAdapterImpl::deinitialize()
 
     for (const auto &save_config : vslam_config_.saveConfig)
     {
+        auto dir_path = save_config.path.substr(0, save_config.path.find_last_of("/\\"));
+        if (!vp::isDirExist(dir_path))
+        {
+            vp::makeDir(dir_path);
+        }
+
         switch (save_config.saveTypes)
         {
         case config::SaveType::MAP_DATABASE:
@@ -187,8 +195,14 @@ bool StellaVslamAdapterImpl::deinitialize()
     if (viewer_ != nullptr)
     {
         viewer_->request_terminate();
+
+        if (viewer_thread_.joinable())
+        {
+            viewer_thread_.join(); // 2. 뷰어 루프가 완전히 끝날 때까지 대기
+            LOG_INF("Viewer thread joined.");
+        }
         viewer_.reset();
-        LOG_INF("Pangolin Viewer terminated.");
+        LOG_INF("Internal Viewer terminated.");
     }
 
     if (slam_system_ != nullptr)
