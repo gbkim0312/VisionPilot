@@ -137,27 +137,53 @@ domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::I
 
 bool StellaVslamAdapterImpl::deinitialize()
 {
-    LOG_INF("Deinitializing VSLAM Adapter...");
+    LOG_TRA("Stopping VSLAM Adapter...");
 
     if (!is_initialized_)
     {
-        LOG_INF("VSLAM Adapter is not initialized. Nothing to deinitialize.");
+        LOG_WRN("VSLAM Adapter is not initialized.");
         return true;
     }
 
-    try
+    for (const auto &save_config : vslam_config_.saveConfig)
     {
-        slam_system_->shutdown();
-        slam_system_.reset();
-        is_initialized_ = false;
-        LOG_INF("VSLAM Adapter deinitialized successfully.");
-    }
-    catch (const std::exception &e)
-    {
-        LOG_ERR("VSLAM deinitialization failed: {}", e.what());
-        return false;
+        switch (save_config.saveTypes)
+        {
+        case config::SaveType::MAP_DATABASE:
+            LOG_INF("Saving VSLAM map to: {}", save_config.path);
+            slam_system_->save_map_database(save_config.path);
+            LOG_INF("VSLAM map saved successfully.");
+            break;
+        case config::SaveType::FULL_TRAJECTORY:
+            LOG_INF("Saving VSLAM trajectory to: {}", save_config.path);
+            slam_system_->save_frame_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
+            LOG_INF("VSLAM trajectory saved successfully.");
+            break;
+        case config::SaveType::KEYFRAME_TRAJECTORY:
+            LOG_INF("Saving VSLAM keyframe trajectory to: {}", save_config.path);
+            slam_system_->save_keyframe_trajectory(save_config.path, ::convertSaveFormatToString(save_config.saveFormat));
+            LOG_INF("VSLAM keyframe trajectory saved successfully.");
+            break;
+        default:
+            LOG_WRN("Unknown SaveType encountered during VSLAM shutdown.");
+            break;
+        }
     }
 
+    if (slam_system_)
+    {
+        LOG_INF("Shutting down VSLAM system...");
+        slam_system_->shutdown();
+        slam_system_.reset();
+
+        LOG_INF("VSLAM system shut down and reset successfully.");
+    }
+    else
+    {
+        LOG_WRN("VSLAM system was not initialized or already shut down.");
+    }
+
+    is_initialized_ = false;
     return true;
 }
 
