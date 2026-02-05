@@ -41,12 +41,11 @@ bool OpenCVViewerAdapterImpl::stop()
     return true;
 }
 void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
-                                     const std::vector<domain::model::Detection> &detections,
+                                     const domain::model::DetectionResult &detections,
                                      const domain::model::ImagePacket &frame)
 {
     cv::Mat canvas;
 
-    // 이미지 획득 (if constexpr 사용으로 변경)
     std::visit([&](auto &&arg)
                {
         using T = std::decay_t<decltype(arg)>;
@@ -87,7 +86,7 @@ void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
     }
 
     // Object Detections 그리기
-    for (const auto &det : detections)
+    for (const auto &det : detections.detections)
     {
         cv::Rect rect(static_cast<int>(det.bbox.x),
                       static_cast<int>(det.bbox.y),

@@ -1,5 +1,8 @@
 #pragma once
+#include <cstdint>
 #include <string>
+#include <sys/types.h>
+#include <vector>
 
 namespace vp::domain::model
 {
@@ -289,6 +292,13 @@ struct Detection
     float confidence;  // 신뢰도 (0.0 ~ 1.0)
     BoundingBox bbox;  // 위치 정보
     std::string label; // (Optional) "person", "car" 등 디버깅용
+};
+
+struct DetectionResult
+{
+    std::vector<Detection> detections;
+    uint64_t frame_id;  // 프레임 ID
+    uint64_t timestamp; // 타임스탬프 (ms)
 };
 
 } // namespace vp::domain::model

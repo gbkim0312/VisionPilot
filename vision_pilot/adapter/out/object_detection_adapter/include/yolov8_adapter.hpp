@@ -4,7 +4,6 @@
 #include "detection_config.hpp"
 #include "object_detection_port.hpp"
 #include <memory>
-#include <vector>
 
 namespace vp::adapter::out
 {
@@ -17,7 +16,7 @@ public:
     ~YOLOv8Adapter() override;
 
     bool start();
-    std::vector<vp::domain::model::Detection> detectObject(const vp::domain::model::ImagePacket &image) override;
+    domain::model::DetectionResult detectObject(const vp::domain::model::ImagePacket &image) override;
     bool stop();
 
 private:

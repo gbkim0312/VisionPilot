@@ -16,6 +16,8 @@ struct Pose
     uint64_t timestamp = 0; // 타임스탬프 (ms)
     bool is_lost = true;
 
+    uint64_t frame_index = 0; // 프레임 인덱스
+
     Pose() = default;
 
     Pose(double x_, double y_, double z_, double qw_, double qx_, double qy_, double qz_)

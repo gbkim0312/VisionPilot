@@ -12,6 +12,6 @@ public:
     ~NoDetectionAdapter() = default;
 
     bool initialize();
-    std::vector<domain::model::Detection> detectObject(const domain::model::ImagePacket &image) override;
+    domain::model::DetectionResult detectObject(const domain::model::ImagePacket &image) override;
 };
 } // namespace vp::adapter::out

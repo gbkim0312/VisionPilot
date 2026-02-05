@@ -14,7 +14,7 @@ bool NoDetectionAdapter::initialize()
     return true;
 }
 
-std::vector<domain::model::Detection> NoDetectionAdapter::detectObject(const domain::model::ImagePacket & /* image */)
+domain::model::DetectionResult NoDetectionAdapter::detectObject(const domain::model::ImagePacket & /* image */)
 {
     return {};
 }

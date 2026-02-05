@@ -28,7 +28,7 @@ bool YOLOv8Adapter::start()
     return impl_->start();
 }
 
-std::vector<vp::domain::model::Detection> YOLOv8Adapter::detectObject(const vp::domain::model::ImagePacket &image)
+domain::model::DetectionResult YOLOv8Adapter::detectObject(const vp::domain::model::ImagePacket &image)
 {
     return impl_->detectObject(image);
 }

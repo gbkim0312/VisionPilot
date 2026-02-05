@@ -133,7 +133,7 @@ bool YOLOv8AdapterImpl::stop()
     return true;
 }
 
-std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &image)
+domain::model::DetectionResult YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &image)
 {
     if (!is_running_ || net_ == nullptr || net_->empty())
     {
@@ -147,7 +147,7 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     return last_detections_;
 }
 
-std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObjectImpl(const vp::domain::model::ImagePacket &image)
+domain::model::DetectionResult YOLOv8AdapterImpl::detectObjectImpl(const vp::domain::model::ImagePacket &image)
 {
     LOG_TRA("");
 
@@ -309,7 +309,12 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObjectImpl(co
         detections.push_back(det);
     }
 
-    return detections;
+    domain::model::DetectionResult result;
+    result.detections = detections;
+    result.frame_id = image.frame_id;
+    result.timestamp = image.timestamp;
+
+    return result;
 }
 
 void YOLOv8AdapterImpl::runDetection()

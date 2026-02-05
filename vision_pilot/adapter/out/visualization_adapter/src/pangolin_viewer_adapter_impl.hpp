@@ -19,7 +19,7 @@ public:
     bool stop();
 
     void render(const domain::model::Pose &pose,
-                const std::vector<domain::model::Detection> &detections,
+                const domain::model::DetectionResult &detections,
                 const domain::model::ImagePacket &frame);
 
 private:

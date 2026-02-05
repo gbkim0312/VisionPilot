@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "detection.hpp"
 #include "image.hpp"
 #include "viewer_config.hpp"
 #include "visualization_port.hpp"
@@ -17,7 +18,7 @@ public:
     bool start();
     bool stop();
 
-    void render(const domain::model::Pose &pose, const std::vector<domain::model::Detection> &detections, const domain::model::ImagePacket &frame) override;
+    void render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::ImagePacket &frame) override;
 
 private:
     std::unique_ptr<OpenCVViewerAdapterImpl> impl_;

@@ -65,8 +65,8 @@ TEST_F(YOLOv8AdapterTest, ShouldDetectObjectsInSampleImage)
 
     auto detections = adapter_->detectObject(image_packet);
 
-    EXPECT_FALSE(detections.empty()) << "No objects detected in the sample image.";
-    for (const auto &det : detections)
+    EXPECT_FALSE(detections.detections.empty()) << "No objects detected in the sample image.";
+    for (const auto &det : detections.detections)
     {
         fmt::print("Detected class_id: {} ({}), confidence: {:.2f}, bbox: x={}, y={}, w={}, h={}", static_cast<uint64_t>(det.class_id), domain::model::ClassIdHelper::toString(det.class_id), det.confidence, det.bbox.x, det.bbox.y, det.bbox.width, det.bbox.height);
     }
