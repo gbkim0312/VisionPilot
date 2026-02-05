@@ -19,6 +19,7 @@
         "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
         "vocabPath": "./etc/orb_vocab.fbow",
         "useInternalViewer": false,
+        "frameQueueSize": 2,
         "loadConfig": {
             "loadMapDatabase": false,
             "path": ""
@@ -46,6 +47,7 @@
     "detectionConfig": {
         "type": "yolov8", // [yolov8|disabled]
         "yolov8": {
+            "frameQueueSize": 2,
             "modelPath": "./etc/yolov8n.onnx",
             "confThreshold": 0.25,
             "nmsThreshold": 0.45,
