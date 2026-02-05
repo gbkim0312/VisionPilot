@@ -358,15 +358,11 @@ domain::model::Pose StellaVslamAdapterImpl::convertStellaPoseToDomainPose(const 
         pose.qy = q.y(); // NOLINT: eigen-alignment
         pose.qz = q.z(); // NOLINT: eigen-alignment
         pose.is_lost = false;
-
-        LOG_DBG("Pose: Position({:.3f}, {:.3f}, {:.3f}), Orientation({:.3f}, {:.3f}, {:.3f}, {:.3f})",
-                pose.x, pose.y, pose.z,
-                pose.qx, pose.qy, pose.qz, pose.qw);
     }
     else
     {
         pose.is_lost = true;
-        LOG_DBG("VSLAM tracking lost.");
+        LOG_INF("VSLAM tracking lost.");
     }
 
     return pose;
