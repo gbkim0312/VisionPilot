@@ -109,7 +109,7 @@ TEST_F(VPServiceDetectionTest, InitializationTest)
 
 TEST_F(VPServiceDetectionTest, RunServiceTest)
 {
-    object_detection_adapter_->initialize();
+    object_detection_adapter_->start();
     visualization_adapter_->start();
 
     constexpr size_t expected_count = 100;

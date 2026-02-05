@@ -118,6 +118,58 @@ domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePac
     return last_pose_;
 }
 
+bool StellaVslamAdapterImpl::stop()
+{
+    LOG_TRA("");
+
+    if (!is_running_)
+    {
+        LOG_INF("VSLAM Adapter is already deinitialized or not yet initialized.");
+        return true;
+    }
+    is_running_ = false;
+
+    LOG_INF("Stopping VSLAM Adapter...");
+
+    if (is_able_to_save_)
+    {
+        this->saveResults();
+    }
+
+    if (viewer_ != nullptr)
+    {
+        viewer_->request_terminate();
+
+        if (viewer_thread_.joinable())
+        {
+            viewer_thread_.join();
+            LOG_INF("Viewer thread joined.");
+        }
+        viewer_.reset();
+        LOG_INF("Internal Viewer terminated.");
+    }
+
+    if (slam_system_ != nullptr)
+    {
+        LOG_INF("Shutting down VSLAM system...");
+        slam_system_->shutdown();
+
+        if (slam_thread_.joinable())
+        {
+            slam_thread_.join();
+            LOG_INF("Slam thread joined.");
+        }
+        slam_system_.reset();
+        LOG_INF("VSLAM system shut down and reset successfully.");
+    }
+    else
+    {
+        LOG_WRN("VSLAM system was not initialized or already shut down.");
+    }
+
+    return true;
+}
+
 void StellaVslamAdapterImpl::runSlam()
 {
     LOG_TRA("");
@@ -187,58 +239,6 @@ bool StellaVslamAdapterImpl::initializeViewer()
         LOG_ERR("Failed to initialize internal viewer: {}", e.what());
         return false;
     }
-    return true;
-}
-
-bool StellaVslamAdapterImpl::stop()
-{
-    LOG_TRA("");
-
-    if (!is_running_)
-    {
-        LOG_INF("VSLAM Adapter is already deinitialized or not yet initialized.");
-        return true;
-    }
-    is_running_ = false;
-
-    LOG_INF("Stopping VSLAM Adapter...");
-
-    if (is_able_to_save_)
-    {
-        this->saveResults();
-    }
-
-    if (viewer_ != nullptr)
-    {
-        viewer_->request_terminate();
-
-        if (viewer_thread_.joinable())
-        {
-            viewer_thread_.join();
-            LOG_INF("Viewer thread joined.");
-        }
-        viewer_.reset();
-        LOG_INF("Internal Viewer terminated.");
-    }
-
-    if (slam_system_ != nullptr)
-    {
-        LOG_INF("Shutting down VSLAM system...");
-        slam_system_->shutdown();
-
-        if (slam_thread_.joinable())
-        {
-            slam_thread_.join();
-            LOG_INF("Slam thread joined.");
-        }
-        slam_system_.reset();
-        LOG_INF("VSLAM system shut down and reset successfully.");
-    }
-    else
-    {
-        LOG_WRN("VSLAM system was not initialized or already shut down.");
-    }
-
     return true;
 }
 

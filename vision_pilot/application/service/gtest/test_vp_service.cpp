@@ -129,7 +129,7 @@ TEST_F(VisionPilotServiceTest, InitializationTest)
 TEST_F(VisionPilotServiceTest, RunServiceTest)
 {
     localization_adapter_->start();
-    object_detection_adapter_->initialize();
+    object_detection_adapter_->start();
     visualization_adapter_->start();
 
     constexpr size_t expected_count = 100;

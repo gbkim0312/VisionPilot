@@ -90,7 +90,7 @@ void OutAdapterRegistry::startExternalAdapters()
     switch (config_.detectionConfig.type)
     {
     case config::DetectionType::YOLOV8:
-        yolo_v8_adapter_->initialize();
+        yolo_v8_adapter_->start();
         break;
     case config::DetectionType::NONE:
         no_detection_adapter_->initialize();
@@ -123,7 +123,7 @@ void OutAdapterRegistry::stopExternalAdapters()
     switch (config_.detectionConfig.type)
     {
     case config::DetectionType::YOLOV8:
-        yolo_v8_adapter_->deinitialize();
+        yolo_v8_adapter_->stop();
         break;
     case config::DetectionType::NONE:
         break;

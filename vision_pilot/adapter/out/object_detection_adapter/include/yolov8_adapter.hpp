@@ -16,9 +16,9 @@ public:
     YOLOv8Adapter(const config::DetectionConfig &config);
     ~YOLOv8Adapter() override;
 
-    bool initialize();
+    bool start();
     std::vector<vp::domain::model::Detection> detectObject(const vp::domain::model::ImagePacket &image) override;
-    bool deinitialize();
+    bool stop();
 
 private:
     std::unique_ptr<YOLOv8AdapterImpl> impl_;

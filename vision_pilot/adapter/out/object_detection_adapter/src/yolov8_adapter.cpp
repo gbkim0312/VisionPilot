@@ -23,9 +23,9 @@ YOLOv8Adapter::~YOLOv8Adapter()
     LOG_TRA("");
 }
 
-bool YOLOv8Adapter::initialize()
+bool YOLOv8Adapter::start()
 {
-    return impl_->initialize();
+    return impl_->start();
 }
 
 std::vector<vp::domain::model::Detection> YOLOv8Adapter::detectObject(const vp::domain::model::ImagePacket &image)
@@ -33,8 +33,8 @@ std::vector<vp::domain::model::Detection> YOLOv8Adapter::detectObject(const vp::
     return impl_->detectObject(image);
 }
 
-bool YOLOv8Adapter::deinitialize()
+bool YOLOv8Adapter::stop()
 {
-    return impl_->deinitialize();
+    return impl_->stop();
 }
 } // namespace vp::adapter::out

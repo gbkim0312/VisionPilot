@@ -45,7 +45,8 @@ namespace vp::adapter::out
 {
 
 YOLOv8AdapterImpl::YOLOv8AdapterImpl(const config::YoloConfig &config)
-    : config_(config)
+    : config_(config),
+      image_queue_{config.frameQueueSize, "YOLOv8 Image Queue", true}
 {
     LOG_TRA("");
 }
@@ -53,14 +54,14 @@ YOLOv8AdapterImpl::YOLOv8AdapterImpl(const config::YoloConfig &config)
 YOLOv8AdapterImpl::~YOLOv8AdapterImpl()
 {
     LOG_TRA("");
-    this->deinitialize();
+    this->stop();
 }
 
-bool YOLOv8AdapterImpl::initialize()
+bool YOLOv8AdapterImpl::start()
 {
     LOG_INF("Initializing YOLOv8 Adapter...");
 
-    if (is_initialized_)
+    if (is_running_)
     {
         LOG_DBG("YOLOv8 Adapter is already initialized.");
         return true;
@@ -95,7 +96,9 @@ bool YOLOv8AdapterImpl::initialize()
         cv::dnn::blobFromImage(dummy);
 
         LOG_INF("YOLOv8 initialized successfully.");
-        is_initialized_ = true;
+
+        detection_thread_ = std::thread(&YOLOv8AdapterImpl::runDetection, this);
+        is_running_ = true;
         return true;
     }
     catch (const cv::Exception &e)
@@ -105,31 +108,48 @@ bool YOLOv8AdapterImpl::initialize()
     }
 }
 
-bool YOLOv8AdapterImpl::deinitialize()
+bool YOLOv8AdapterImpl::stop()
 {
     LOG_TRA("");
 
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    if (!is_initialized_)
+    if (!is_running_)
     {
         LOG_DBG("YOLOv8 Adapter is not initialized.");
         return true;
     }
-    net_.reset(); // 안전하게 해제
-    is_initialized_ = false;
+    is_running_ = false;
+
+    LOG_INF("Deinitializing YOLOv8 Adapter...");
+
+    if (detection_thread_.joinable())
+    {
+        detection_thread_.join();
+        LOG_INF("Detection thread joined.");
+    }
+    if (net_ != nullptr)
+    {
+        net_.reset(); // 안전하게 해제
+    }
     return true;
 }
 
 std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const vp::domain::model::ImagePacket &image)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    if (!is_initialized_ || net_ == nullptr || net_->empty())
+    if (!is_running_ || net_ == nullptr || net_->empty())
     {
         LOG_ERR("Network not initialized.");
         return {};
     }
+
+    image_queue_.enqueue(image);
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    return last_detections_;
+}
+
+std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObjectImpl(const vp::domain::model::ImagePacket &image)
+{
+    LOG_TRA("");
 
     // 1. ImagePacket에서 cv::Mat 추출
     const vp::domain::model::RawImage *raw_ptr = nullptr;
@@ -292,4 +312,20 @@ std::vector<vp::domain::model::Detection> YOLOv8AdapterImpl::detectObject(const 
     return detections;
 }
 
+void YOLOv8AdapterImpl::runDetection()
+{
+    LOG_TRA("");
+    while (is_running_)
+    {
+        vp::domain::model::ImagePacket image_packet;
+        if (image_queue_.waitAndDeque(image_packet))
+        {
+            auto detections = this->detectObjectImpl(image_packet);
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                last_detections_ = detections;
+            }
+        }
+    }
+}
 } // namespace vp::adapter::out

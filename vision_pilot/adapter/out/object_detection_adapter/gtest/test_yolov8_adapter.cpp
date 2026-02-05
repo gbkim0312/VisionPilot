@@ -36,12 +36,12 @@ protected:
 
 TEST_F(YOLOv8AdapterTest, ShouldInitializeSuccessfully)
 {
-    EXPECT_TRUE(adapter_->initialize());
+    EXPECT_TRUE(adapter_->start());
 }
 
 TEST_F(YOLOv8AdapterTest, ShouldDetectObjectsInSampleImage)
 {
-    EXPECT_TRUE(adapter_->initialize());
+    EXPECT_TRUE(adapter_->start());
 
     std::string project_root = "/home/gbkim/project/VisionPilot";
     std::string image_path = joinDir(project_root, "vision_pilot/res/etc/sample.png");
