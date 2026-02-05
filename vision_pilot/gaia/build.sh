@@ -98,5 +98,5 @@ $CMAKE -G "$GENERATOR" -S . -B $BUILD_DIR -Wno-dev \
   -DGAIA_SHARED_LIBS=$GAIA_SHARED \
   -DSTANDARD_TYPE=${STANDARD_TYPE}
 
-[[ -n $CLEAN ]] && $CMAKE --build $BUILD_DIR --target clean
-$CMAKE --build $BUILD_DIR -- $VERBOSE install -j16
+# [[ -n $CLEAN ]] && $CMAKE --build $BUILD_DIR --target clean
+# $CMAKE --build $BUILD_DIR -- $VERBOSE install -j16

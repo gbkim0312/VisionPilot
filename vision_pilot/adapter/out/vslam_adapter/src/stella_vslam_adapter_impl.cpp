@@ -1,6 +1,5 @@
 #include "stella_vslam_adapter_impl.hpp"
 
-#include "gaia_exception.hpp"
 #include "gaia_log.hpp"
 #include "pose.hpp"
 #include "stella_vslam/config.h"
@@ -36,7 +35,8 @@ std::string convertSaveFormatToString(std::optional<vp::config::SaveFormat> form
 namespace vp::adapter::out
 {
 StellaVslamAdapterImpl::StellaVslamAdapterImpl(const config::VslamAdapterConfig &vslam_config)
-    : vslam_config_{vslam_config}
+    : vslam_config_{vslam_config},
+      frame_queue_{vslam_config.frameQueueSize, "VSLAM Frame Queue", true}
 {
     LOG_TRA("");
 
@@ -53,7 +53,7 @@ bool StellaVslamAdapterImpl::initialize()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
-    if (is_initialized_)
+    if (is_running_)
     {
         LOG_INF("VSLAM Adapter is already initialized.");
         return true;
@@ -91,7 +91,9 @@ bool StellaVslamAdapterImpl::initialize()
             LOG_INF("Mapping module disabled for localization-only mode.");
         }
 
-        is_initialized_ = true;
+        slam_thread_ = std::thread(&StellaVslamAdapterImpl::runSlam, this);
+
+        is_running_ = true;
     }
     catch (const std::exception &e)
     {
@@ -104,23 +106,30 @@ bool StellaVslamAdapterImpl::initialize()
 
 domain::model::Pose StellaVslamAdapterImpl::update(const domain::model::ImagePacket &image, uint64_t timestamp)
 {
-    if (!is_initialized_)
+    if (!is_running_)
     {
         LOG_TRA("Stella VSLAM Adapter is not yet initialized.");
         return domain::model::Pose{};
     }
 
-    switch (vslam_config_.method)
+    frame_queue_.enqueue({image, timestamp});
+
+    std::lock_guard<std::mutex> lock(pose_mutex_);
+    return last_pose_;
+}
+
+void StellaVslamAdapterImpl::runSlam()
+{
+    LOG_TRA("");
+
+    while (is_running_)
     {
-    case config::VslamMethod::MONOCULAR:
-        return this->feedMonoFrame(image, timestamp);
-    case config::VslamMethod::STEREO:
-        return this->feedStereoFrame(image, timestamp);
-    case config::VslamMethod::RGB_D:
-        return this->feedRgbdFrame(image, timestamp);
-    default:
-        LOG_ERR("Unsupported VSLAM method in update(): {}", static_cast<int>(vslam_config_.method));
-        return domain::model::Pose{};
+        ImageTimestamp image_packet;
+        if (frame_queue_.waitAndDeque(image_packet))
+        {
+            std::lock_guard<std::mutex> lock(pose_mutex_);
+            last_pose_ = this->feedFrame(image_packet.image, image_packet.timestamp);
+        }
     }
 }
 
@@ -185,11 +194,13 @@ bool StellaVslamAdapterImpl::deinitialize()
 {
     LOG_TRA("");
 
-    if (!is_initialized_)
+    if (!is_running_)
     {
         LOG_INF("VSLAM Adapter is already deinitialized or not yet initialized.");
         return true;
     }
+    is_running_ = false;
+
     LOG_INF("Stopping VSLAM Adapter...");
 
     if (is_able_to_save_)
@@ -214,8 +225,13 @@ bool StellaVslamAdapterImpl::deinitialize()
     {
         LOG_INF("Shutting down VSLAM system...");
         slam_system_->shutdown();
-        slam_system_.reset();
 
+        if (slam_thread_.joinable())
+        {
+            slam_thread_.join();
+            LOG_INF("Slam thread joined.");
+        }
+        slam_system_.reset();
         LOG_INF("VSLAM system shut down and reset successfully.");
     }
     else
@@ -223,8 +239,25 @@ bool StellaVslamAdapterImpl::deinitialize()
         LOG_WRN("VSLAM system was not initialized or already shut down.");
     }
 
-    is_initialized_ = false;
     return true;
+}
+
+domain::model::Pose StellaVslamAdapterImpl::feedFrame(const domain::model::ImagePacket &image, uint64_t timestamp)
+{
+    LOG_TRA("");
+
+    switch (vslam_config_.method)
+    {
+    case config::VslamMethod::MONOCULAR:
+        return this->feedMonoFrame(image, timestamp);
+    case config::VslamMethod::STEREO:
+        return this->feedStereoFrame(image, timestamp);
+    case config::VslamMethod::RGB_D:
+        return this->feedRgbdFrame(image, timestamp);
+    default:
+        LOG_ERR("Unsupported VSLAM method in update(): {}", static_cast<int>(vslam_config_.method));
+        return domain::model::Pose{};
+    }
 }
 
 domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::ImagePacket &image, uint64_t timestamp)

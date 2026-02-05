@@ -13,6 +13,7 @@ struct YoloConfig
     float nmsThreshold = 0.45f;
     int inputWidth = 640;
     int inputHeight = 640;
+    uint32_t frameQueueSize = 2;
     bool useCuda = false; // GPU 사용 여부
 };
 
@@ -22,6 +23,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(YoloConfig,
                                    nmsThreshold,
                                    inputWidth,
                                    inputHeight,
+                                   frameQueueSize,
                                    useCuda)
 
 enum class DetectionType

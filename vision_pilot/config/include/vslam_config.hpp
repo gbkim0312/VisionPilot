@@ -134,6 +134,7 @@ struct VslamAdapterConfig
     std::string vslamConfigFilePath; // VSLAM용 설정 파일 경로
     std::string vocabPath;           // VSLAM용 보캐뷸러리 파일 경로
     bool useInternalViewer = false;
+    uint32_t frameQueueSize = 2;
     LoadConfig loadConfig;
     std::vector<SaveConfig> saveConfig;
 };
@@ -143,6 +144,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VslamAdapterConfig,
                                    vslamConfigFilePath,
                                    method,
                                    vocabPath,
+                                   frameQueueSize,
                                    loadConfig,
                                    saveConfig,
                                    useInternalViewer)
