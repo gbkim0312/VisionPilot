@@ -103,7 +103,7 @@ void OutAdapterRegistry::startExternalAdapters()
     switch (config_.vslamAdapterConfig.type)
     {
     case config::VslamType::STELLA_VSLAM:
-        stella_vslam_adapter_->initialize();
+        stella_vslam_adapter_->start();
         break;
     case config::VslamType::ORB_SLAM3:
         orb_slam_adapter_->initialize();
@@ -135,7 +135,7 @@ void OutAdapterRegistry::stopExternalAdapters()
     switch (config_.vslamAdapterConfig.type)
     {
     case config::VslamType::STELLA_VSLAM:
-        stella_vslam_adapter_->deinitialize();
+        stella_vslam_adapter_->stop();
         break;
     case config::VslamType::ORB_SLAM3:
         orb_slam_adapter_->deinitialize();

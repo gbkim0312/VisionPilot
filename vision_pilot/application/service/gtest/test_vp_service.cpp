@@ -128,7 +128,7 @@ TEST_F(VisionPilotServiceTest, InitializationTest)
 
 TEST_F(VisionPilotServiceTest, RunServiceTest)
 {
-    localization_adapter_->initialize();
+    localization_adapter_->start();
     object_detection_adapter_->initialize();
     visualization_adapter_->start();
 

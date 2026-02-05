@@ -144,7 +144,7 @@ TEST_F(VisionPilotServiceStereoTest, InitializationTest)
 
 TEST_F(VisionPilotServiceStereoTest, RunServiceTest)
 {
-    localization_adapter_->initialize();
+    localization_adapter_->start();
     object_detection_adapter_->initialize();
     visualization_adapter_->start();
 

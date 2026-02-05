@@ -30,7 +30,7 @@ protected:
 
         // 3. 어댑터 초기화 및 검증
         vslam_adapter_ = std::make_unique<StellaVslamAdapter>(vslam_config_);
-        ASSERT_TRUE(vslam_adapter_->initialize()) << "VSLAM Adapter initialization failed!";
+        ASSERT_TRUE(vslam_adapter_->start()) << "VSLAM Adapter initialization failed!";
 
         // 4. vp 유틸리티를 사용한 이미지 파일 목록 읽기
         std::string image0_dir = vp::joinDir(kitti_base, "image_0");
@@ -67,6 +67,13 @@ protected:
         }
     }
 
+    void TearDown() override
+    {
+        if (vslam_adapter_)
+        {
+            vslam_adapter_->stop();
+        }
+    }
     // OpenCV Mat -> ImagePacket 변환 헬퍼
     domain::model::ImagePacket createPacket(const cv::Mat &left, const cv::Mat &right, uint64_t frame_id, uint64_t ts)
     {

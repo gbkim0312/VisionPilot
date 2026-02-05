@@ -26,9 +26,9 @@ public:
     StellaVslamAdapterImpl(const config::VslamAdapterConfig &vslam_config);
     ~StellaVslamAdapterImpl();
 
-    bool initialize();
+    bool start();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp);
-    bool deinitialize();
+    bool stop();
 
 private:
     const config::VslamAdapterConfig &vslam_config_;

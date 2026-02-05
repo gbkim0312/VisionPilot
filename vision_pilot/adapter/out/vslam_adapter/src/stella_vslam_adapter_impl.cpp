@@ -46,10 +46,10 @@ StellaVslamAdapterImpl::StellaVslamAdapterImpl(const config::VslamAdapterConfig 
 StellaVslamAdapterImpl::~StellaVslamAdapterImpl()
 {
     LOG_TRA("");
-    this->deinitialize();
+    this->stop();
 }
 
-bool StellaVslamAdapterImpl::initialize()
+bool StellaVslamAdapterImpl::start()
 {
     LOG_INF("Initializing VSLAM Adapter...");
 
@@ -190,7 +190,7 @@ bool StellaVslamAdapterImpl::initializeViewer()
     return true;
 }
 
-bool StellaVslamAdapterImpl::deinitialize()
+bool StellaVslamAdapterImpl::stop()
 {
     LOG_TRA("");
 
@@ -268,7 +268,7 @@ domain::model::Pose StellaVslamAdapterImpl::feedMonoFrame(const domain::model::I
     if (mono_payload == nullptr)
     {
         LOG_ERR("Invalid image payload for Mono VSLAM Adapter. Disabling VSLAM. Check VideoLoader configuration.");
-        this->deinitialize();
+        this->stop();
         return {};
     }
 
@@ -302,7 +302,7 @@ domain::model::Pose StellaVslamAdapterImpl::feedStereoFrame(const domain::model:
     if (stereo_payload == nullptr)
     {
         LOG_ERR("Invalid image payload for Stereo VSLAM Adapter. Disabling VSLAM. Check VideoLoader configuration.");
-        this->deinitialize();
+        this->stop();
         return {};
     }
 

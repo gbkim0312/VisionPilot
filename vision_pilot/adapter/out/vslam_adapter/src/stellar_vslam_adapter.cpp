@@ -19,9 +19,9 @@ StellaVslamAdapter::~StellaVslamAdapter()
     LOG_TRA("");
 }
 
-bool StellaVslamAdapter::initialize()
+bool StellaVslamAdapter::start()
 {
-    return impl_->initialize();
+    return impl_->start();
 }
 
 domain::model::Pose StellaVslamAdapter::update(const domain::model::ImagePacket &image, uint64_t timestamp)
@@ -29,9 +29,9 @@ domain::model::Pose StellaVslamAdapter::update(const domain::model::ImagePacket 
     return impl_->update(image, timestamp);
 }
 
-bool StellaVslamAdapter::deinitialize()
+bool StellaVslamAdapter::stop()
 {
-    return impl_->deinitialize();
+    return impl_->stop();
 }
 
 } // namespace vp::adapter::out

@@ -13,9 +13,9 @@ public:
     StellaVslamAdapter(const config::VslamAdapterConfig &vslam_config);
     ~StellaVslamAdapter() override;
 
-    bool initialize();
+    bool start();
     domain::model::Pose update(const domain::model::ImagePacket &image, uint64_t timestamp) override;
-    bool deinitialize();
+    bool stop();
 
 private:
     std::unique_ptr<StellaVslamAdapterImpl> impl_;
