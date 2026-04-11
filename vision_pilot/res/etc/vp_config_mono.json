@@ -42,7 +42,11 @@
         ]
     },
     "viewerConfig": {
-        "viewerType": "opencv" // [pangolin|opencv|socket|none]
+        "viewerType": "opencv", // [pangolin|opencv|socket|none]
+        "renderOption": {
+            "renderDetection": true,
+            "renderTracking": true
+        }
     },
     "detectionConfig": {
         "type": "yolov8", // [yolov8|disabled]
