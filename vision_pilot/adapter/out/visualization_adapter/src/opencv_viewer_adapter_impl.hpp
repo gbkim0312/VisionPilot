@@ -3,6 +3,7 @@
 #include "detection.hpp"
 #include "image.hpp"
 #include "pose.hpp"
+#include "tracking.hpp"
 #include "viewer_config.hpp"
 namespace vp::adapter::out
 {
@@ -14,7 +15,7 @@ public:
     bool start();
     bool stop();
 
-    void render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::ImagePacket &frame);
+    void render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::TrackingResult &tracking, const domain::model::ImagePacket &frame);
 
 private:
     const config::ViewerConfig config_;

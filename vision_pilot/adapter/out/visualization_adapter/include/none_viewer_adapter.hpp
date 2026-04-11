@@ -14,7 +14,7 @@ public:
     bool start() const;
     bool stop() const;
 
-    void render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::ImagePacket &frame) override;
+    void render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::TrackingResult &tracking, const domain::model::ImagePacket &frame) override;
 
 private:
     const config::ViewerConfig &config_;

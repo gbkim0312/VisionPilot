@@ -2,6 +2,7 @@
 
 #include "localization_port.hpp"
 #include "object_detection_port.hpp"
+#include "object_tracking_port.hpp"
 #include "vision_pilot_service.hpp"
 #include "visualization_port.hpp"
 
@@ -13,7 +14,9 @@ class VisionPilotServiceImpl
 public:
     VisionPilotServiceImpl(vp::port::out::LocalizationPort &localization_port,
                            vp::port::out::VisualizationPort &visualization_port,
-                           vp::port::out::ObjectDetectionPort &object_detection_port);
+                           vp::port::out::ObjectDetectionPort &object_detection_port,
+                           vp::port::out::ObjectTrackingPort &object_tracking_port);
+
     ~VisionPilotServiceImpl();
 
     void onFrameReceived(const domain::model::ImagePacket &frame);
@@ -25,6 +28,7 @@ private:
     vp::port::out::LocalizationPort &localization_port_;
     vp::port::out::VisualizationPort &visualization_port_;
     vp::port::out::ObjectDetectionPort &object_detection_port_;
+    vp::port::out::ObjectTrackingPort &object_tracking_port_;
 };
 
 } // namespace vp::service

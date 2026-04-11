@@ -63,6 +63,8 @@ OutAdapterRegistry::OutAdapterRegistry(const config::AssemblyConfig &config)
     default:
         THROWLOG(SysException, "Unsupported Detection type specified in configuration.");
     }
+
+    object_tracking_adapter_ = std::make_unique<vp::adapter::out::ObjectTrackingAdapter>();
 }
 
 void OutAdapterRegistry::startExternalAdapters()
@@ -207,4 +209,10 @@ vp::port::out::ObjectDetectionPort &OutAdapterRegistry::getObjectDetectionPort()
         THROWLOG(SysException, "Unsupported Detection type. Cannot provide ObjectDetectionPort.");
     }
 }
+
+vp::port::out::ObjectTrackingPort &OutAdapterRegistry::getObjectTrackingPort()
+{
+    return *object_tracking_adapter_;
+}
+
 } // namespace vp::assembly

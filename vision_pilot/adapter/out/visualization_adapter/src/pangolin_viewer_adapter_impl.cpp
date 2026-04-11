@@ -90,6 +90,7 @@ bool PangolinViewerAdapterImpl::stop()
 void PangolinViewerAdapterImpl::render(
     const domain::model::Pose &pose,
     const domain::model::DetectionResult &,
+    const domain::model::TrackingResult &,
     const domain::model::ImagePacket &)
 {
     if (!is_running_)

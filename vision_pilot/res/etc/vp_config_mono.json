@@ -8,7 +8,7 @@
             "height": 0 //0: default size
         },
         "mono": {
-            "source": "/home/gbkim/project/VisionPilot/vision_pilot/res/dataset/kitti/dataset/sequences/00/image_0",
+            "source": "/home/gbkim/study/dataset/kitti/00/image_0",
             "maxImageBufferSize": 100,
             "colorFormat": "grayscale" // [grayscale|color]
         }
@@ -16,7 +16,7 @@
     "vslamAdapterConfig": {
         "type": "stellaVslam", // [stellaVslam|orbSlam3|none]
         "method": "monocular", // [monocular|stereo|rgbd|disabled]
-        "vslamConfigFilePath": "/home/gbkim/project/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
+        "vslamConfigFilePath": "/home/gbkim/study/VisionPilot/thirdparty/stella_vslam/example/kitti/KITTI_mono_00-02.yaml",
         "vocabPath": "./etc/orb_vocab.fbow",
         "useInternalViewer": false,
         "frameQueueSize": 2,

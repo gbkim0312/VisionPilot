@@ -7,10 +7,12 @@ namespace vp::service
 
 VisionPilotServiceImpl::VisionPilotServiceImpl(vp::port::out::LocalizationPort &localization_port,
                                                vp::port::out::VisualizationPort &visualization_port,
-                                               vp::port::out::ObjectDetectionPort &object_detection_port)
+                                               vp::port::out::ObjectDetectionPort &object_detection_port,
+                                               vp::port::out::ObjectTrackingPort &object_tracking_port)
     : localization_port_{localization_port},
       visualization_port_{visualization_port},
-      object_detection_port_{object_detection_port}
+      object_detection_port_{object_detection_port},
+      object_tracking_port_{object_tracking_port}
 {
     LOG_TRA("Starting VisionPilot Service...");
 }
@@ -24,8 +26,9 @@ void VisionPilotServiceImpl::onFrameReceived(const domain::model::ImagePacket &f
 {
     auto pose = localization_port_.update(frame, frame.timestamp);
     auto detection = object_detection_port_.detectObject(frame);
+    auto tracking = object_tracking_port_.update(detection, pose, frame.timestamp);
 
-    visualization_port_.render(pose, detection, frame);
+    visualization_port_.render(pose, detection, tracking, frame);
 }
 
 } // namespace vp::service

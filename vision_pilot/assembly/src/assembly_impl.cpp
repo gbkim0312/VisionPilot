@@ -15,7 +15,8 @@ AssemblyImpl::AssemblyImpl(const config::AssemblyConfig &config)
     vision_pilot_service_ = std::make_unique<service::VisionPilotService>(
         out_adapter_registry_->getLocalizationPort(),
         out_adapter_registry_->getVisualizationPort(),
-        out_adapter_registry_->getObjectDetectionPort());
+        out_adapter_registry_->getObjectDetectionPort(),
+        out_adapter_registry_->getObjectTrackingPort());
 
     in_adapter_registry_ = std::make_unique<InAdapterRegistry>(config_, event_queue_, *vision_pilot_service_);
 

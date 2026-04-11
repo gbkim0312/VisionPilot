@@ -40,95 +40,252 @@ bool OpenCVViewerAdapterImpl::stop()
     }
     return true;
 }
+
 void OpenCVViewerAdapterImpl::render(const domain::model::Pose &pose,
                                      const domain::model::DetectionResult &detections,
+                                     const domain::model::TrackingResult &tracking,
                                      const domain::model::ImagePacket &frame)
 {
     cv::Mat canvas;
-
-    std::visit([&](auto &&arg)
-               {
-        using T = std::decay_t<decltype(arg)>;
-
-        // MonoImagePacket
-        if constexpr (std::is_same_v<T, domain::model::MonoImagePacket>) //NOLINT
+    std::visit(
+        [&](auto &&arg)
         {
-            auto type = (arg.frame.channels == 1) ? CV_8UC1 : CV_8UC3; //NOLINT: opencv
-            canvas = cv::Mat(arg.frame.height, arg.frame.width, type,
+            using T = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<T, domain::model::MonoImagePacket>)
+            {
+                auto type = (arg.frame.channels == 1) ? CV_8UC1 : CV_8UC3;
+                canvas = cv::Mat(
+                             arg.frame.height,
+                             arg.frame.width,
+                             type,
                              const_cast<uint8_t *>(arg.frame.data.data()))
-                         .clone();
+                             .clone();
 
-            if (type == CV_8UC1) //NOLINT: opencv
-            {
-                cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
+                if (type == CV_8UC1)
+                {
+                    cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
+                }
             }
-        }
-        // StereoImagePacket
-        else if constexpr (std::is_same_v<T, domain::model::StereoImagePacket>)
-        {
-            auto type = (arg.left.channels == 1) ? CV_8UC1 : CV_8UC3; //NOLINT: opencv
-            cv::Mat left_mat(arg.left.height, arg.left.width, type,
-                             const_cast<uint8_t *>(arg.left.data.data()));
-            cv::Mat right_mat(arg.right.height, arg.right.width, type,
-                              const_cast<uint8_t *>(arg.right.data.data()));
-
-            cv::vconcat(left_mat, right_mat, canvas);
-
-            if (type == CV_8UC1) //NOLINT: opencv
+            else if constexpr (std::is_same_v<T, domain::model::StereoImagePacket>)
             {
-                cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
+                auto type = (arg.left.channels == 1) ? CV_8UC1 : CV_8UC3;
+
+                cv::Mat left_mat(
+                    arg.left.height,
+                    arg.left.width,
+                    type,
+                    const_cast<uint8_t *>(arg.left.data.data()));
+
+                cv::Mat right_mat(
+                    arg.right.height,
+                    arg.right.width,
+                    type,
+                    const_cast<uint8_t *>(arg.right.data.data()));
+
+                cv::vconcat(left_mat, right_mat, canvas);
+
+                if (type == CV_8UC1)
+                {
+                    cv::cvtColor(canvas, canvas, cv::COLOR_GRAY2BGR);
+                }
             }
-        } }, frame.payload);
+        },
+        frame.payload);
 
     if (canvas.empty())
     {
         return;
     }
 
-    // Object Detections 그리기
     for (const auto &det : detections.detections)
     {
-        cv::Rect rect(static_cast<int>(det.bbox.x),
-                      static_cast<int>(det.bbox.y),
-                      static_cast<int>(det.bbox.width),
-                      static_cast<int>(det.bbox.height));
+        cv::Rect rect(
+            static_cast<int>(det.bbox.x),
+            static_cast<int>(det.bbox.y),
+            static_cast<int>(det.bbox.width),
+            static_cast<int>(det.bbox.height));
 
-        cv::Scalar box_color(0, 255, 255); // 노란색
+        const cv::Scalar box_color{0, 255, 255};
         cv::rectangle(canvas, rect, box_color, 2);
 
-        std::string class_name = domain::model::ClassIdHelper::toString(det.class_id);
+        const auto class_name = domain::model::ClassIdHelper::toString(det.class_id);
 
         std::stringstream ss;
-        ss << class_name << " " << std::fixed << std::setprecision(2) << det.confidence;
-        std::string label_text = ss.str();
+        ss << "DET " << class_name << " " << std::fixed << std::setprecision(2) << det.confidence;
 
-        double font_scale = 0.5;
-        int font_thickness = 1;
-        int baseline = 0;
+        const auto label_text = ss.str();
+        constexpr double kFontScale = 0.5;
+        constexpr int kFontThickness = 1;
 
-        cv::Size text_size = cv::getTextSize(label_text, cv::FONT_HERSHEY_SIMPLEX, font_scale, font_thickness, &baseline);
+        auto baseline = 0;
+        const auto text_size =
+            cv::getTextSize(label_text, cv::FONT_HERSHEY_SIMPLEX, kFontScale, kFontThickness, &baseline);
 
-        cv::rectangle(canvas,
-                      cv::Point(rect.x, rect.y - text_size.height - 5),
-                      cv::Point(rect.x + text_size.width, rect.y),
-                      box_color, -1);
+        const auto label_top = std::max(0, rect.y - text_size.height - 5);
 
-        cv::putText(canvas, label_text,
-                    cv::Point(rect.x, rect.y - 5),
-                    cv::FONT_HERSHEY_SIMPLEX, font_scale, cv::Scalar(0, 0, 0), font_thickness);
+        cv::rectangle(
+            canvas,
+            cv::Point{rect.x, label_top},
+            cv::Point{rect.x + text_size.width, rect.y},
+            box_color,
+            -1);
+
+        cv::putText(
+            canvas,
+            label_text,
+            cv::Point{rect.x, rect.y - 5},
+            cv::FONT_HERSHEY_SIMPLEX,
+            kFontScale,
+            cv::Scalar{0, 0, 0},
+            kFontThickness);
     }
 
-    std::string status = pose.is_lost ? "LOST" : "TRACKING";
-    std::string pos_text = "Status: " + status +
-                           " | Pose: X=" + std::to_string(pose.x).substr(0, 5) +
-                           ", Y=" + std::to_string(pose.y).substr(0, 5);
+    auto tracked_count = 0;
+    auto new_count = 0;
+    auto lost_count = 0;
 
-    cv::Scalar text_color = pose.is_lost ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0);
-    cv::putText(canvas, pos_text, cv::Point(20, 40),
-                cv::FONT_HERSHEY_SIMPLEX, 0.7, text_color, 2);
+    for (const auto &obj : tracking.objects)
+    {
+        cv::Scalar box_color{};
+        std::string status_text;
+
+        switch (obj.status)
+        {
+        case domain::model::TrackStatus::NEW:
+            box_color = cv::Scalar{255, 0, 0};
+            status_text = "NEW";
+            ++new_count;
+            break;
+        case domain::model::TrackStatus::TRACKED:
+            box_color = cv::Scalar{0, 255, 0};
+            status_text = "TRACKED";
+            ++tracked_count;
+            break;
+        case domain::model::TrackStatus::LOST:
+            box_color = cv::Scalar{0, 0, 255};
+            status_text = "LOST";
+            ++lost_count;
+            break;
+        case domain::model::TrackStatus::REMOVED:
+            continue;
+        }
+
+        cv::Rect rect(
+            static_cast<int>(obj.bbox.x),
+            static_cast<int>(obj.bbox.y),
+            static_cast<int>(obj.bbox.width),
+            static_cast<int>(obj.bbox.height));
+
+        cv::rectangle(canvas, rect, box_color, 2);
+
+        const auto class_name = domain::model::ClassIdHelper::toString(obj.class_id);
+
+        std::stringstream ss;
+        ss << "ID:" << obj.track_id
+           << " " << class_name
+           << " " << status_text
+           << " C:" << std::fixed << std::setprecision(2) << obj.confidence;
+
+        const auto line1 = ss.str();
+
+        std::stringstream vs;
+        vs << "V:(" << std::fixed << std::setprecision(1)
+           << obj.velocity.x << "," << obj.velocity.y << ") "
+           << "Age:" << obj.tracking_age
+           << " Lost:" << obj.lost_count;
+
+        const auto line2 = vs.str();
+
+        constexpr double kFontScale = 0.5;
+        constexpr int kFontThickness = 1;
+
+        auto baseline_1 = 0;
+        auto baseline_2 = 0;
+
+        const auto text_size_1 = cv::getTextSize(line1, cv::FONT_HERSHEY_SIMPLEX, kFontScale, kFontThickness, &baseline_1);
+        const auto text_size_2 = cv::getTextSize(line2, cv::FONT_HERSHEY_SIMPLEX, kFontScale, kFontThickness, &baseline_2);
+
+        const auto label_width = std::max(text_size_1.width, text_size_2.width);
+        const auto label_height = text_size_1.height + text_size_2.height + 10;
+        const auto label_top = std::max(0, rect.y - label_height);
+
+        cv::rectangle(
+            canvas,
+            cv::Point{rect.x, label_top},
+            cv::Point{rect.x + label_width + 4, rect.y},
+            box_color,
+            -1);
+
+        cv::putText(
+            canvas,
+            line1,
+            cv::Point{rect.x + 2, label_top + text_size_1.height + 1},
+            cv::FONT_HERSHEY_SIMPLEX,
+            kFontScale,
+            cv::Scalar{0, 0, 0},
+            kFontThickness);
+
+        cv::putText(
+            canvas,
+            line2,
+            cv::Point{rect.x + 2, label_top + text_size_1.height + text_size_2.height + 5},
+            cv::FONT_HERSHEY_SIMPLEX,
+            kFontScale,
+            cv::Scalar{0, 0, 0},
+            kFontThickness);
+
+        const auto center_x = obj.bbox.x + obj.bbox.width * 0.5F;
+        const auto center_y = obj.bbox.y + obj.bbox.height * 0.5F;
+
+        constexpr auto kVelocityArrowScale = 5.0F;
+
+        const cv::Point start_point{
+            static_cast<int>(center_x),
+            static_cast<int>(center_y)};
+
+        const cv::Point end_point{
+            static_cast<int>(center_x + obj.velocity.x * kVelocityArrowScale),
+            static_cast<int>(center_y + obj.velocity.y * kVelocityArrowScale)};
+
+        cv::arrowedLine(canvas, start_point, end_point, box_color, 2);
+    }
+
+    const auto status = pose.is_lost ? std::string{"LOST"} : std::string{"TRACKING"};
+
+    std::stringstream pose_ss;
+    pose_ss << "Status: " << status
+            << " | Pose: X=" << std::fixed << std::setprecision(2) << pose.x
+            << ", Y=" << pose.y;
+
+    const auto pose_text = pose_ss.str();
+    const cv::Scalar pose_text_color = pose.is_lost ? cv::Scalar{0, 0, 255} : cv::Scalar{0, 255, 0};
+
+    cv::putText(
+        canvas,
+        pose_text,
+        cv::Point{20, 30},
+        cv::FONT_HERSHEY_SIMPLEX,
+        0.7,
+        pose_text_color,
+        2);
+
+    std::stringstream track_summary_ss;
+    track_summary_ss << "Tracks: total=" << tracking.objects.size()
+                     << " tracked=" << tracked_count
+                     << " new=" << new_count
+                     << " lost=" << lost_count;
+
+    cv::putText(
+        canvas,
+        track_summary_ss.str(),
+        cv::Point{20, 60},
+        cv::FONT_HERSHEY_SIMPLEX,
+        0.7,
+        cv::Scalar{255, 255, 255},
+        2);
 
     cv::imshow(window_name_, canvas);
     cv::waitKey(1);
 }
-
 } // namespace vp::adapter::out

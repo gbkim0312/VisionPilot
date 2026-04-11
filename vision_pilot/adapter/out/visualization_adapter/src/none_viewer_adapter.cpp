@@ -31,11 +31,11 @@ bool NoneViewerAdapter::stop() const
     LOG_TRA("");
     return true;
 }
-void NoneViewerAdapter::render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::ImagePacket &frame)
+void NoneViewerAdapter::render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::TrackingResult &tracking, const domain::model::ImagePacket &frame)
 {
     LOG_TRA("");
 
-    LOG_TRA("Received frame for rendering in None Viewer. Pose is_lost: {}, Detections count: {}, Frame id: {}", pose.is_lost, detections.detections.size(), frame.frame_id);
+    LOG_TRA("Received frame for rendering in None Viewer. Pose is_lost: {}, Detections count: {}, Tracking count: {}, Frame id: {}", pose.is_lost, detections.detections.size(), tracking.objects.size(), frame.frame_id);
     LOG_TRA("X: {}, Y: {}, Z: {}", pose.x, pose.y, pose.z);
 
     std::string detection_info;
@@ -51,6 +51,20 @@ void NoneViewerAdapter::render(const domain::model::Pose &pose, const domain::mo
     }
 
     LOG_TRA("Detected: \n{}", detection_info);
+
+    std::string tracking_info;
+    for (const auto &object : tracking.objects)
+    {
+        tracking_info +=
+            "Class: " + domain::model::ClassIdHelper::toString(object.class_id) +
+            ", Confidence: " + std::to_string(object.confidence) +
+            ", BBox: [" + std::to_string(object.bbox.x) + ", " +
+            std::to_string(object.bbox.y) + ", " +
+            std::to_string(object.bbox.width) + ", " +
+            std::to_string(object.bbox.height) + "]\n";
+    }
+
+    LOG_TRA("Tracked: \n{}", tracking_info);
 
     return;
 }

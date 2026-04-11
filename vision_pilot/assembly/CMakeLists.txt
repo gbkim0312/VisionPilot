@@ -14,6 +14,7 @@ set(_LINK_PRIVATE_LIBRARIES
   vp::vp_frame_loader
   vp::adapter_yolov8
   vp::adapter_visualization
+  vp::adapter_object_tracking
   vp::adapter_vslam
   vp::model
   vp::service

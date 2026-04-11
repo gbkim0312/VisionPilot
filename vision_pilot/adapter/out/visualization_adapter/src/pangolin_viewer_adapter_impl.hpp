@@ -3,6 +3,7 @@
 #include "detection.hpp"
 #include "image.hpp"
 #include "pose.hpp"
+#include "tracking.hpp"
 #include "viewer_config.hpp"
 #include <pangolin/pangolin.h>
 #include <vector>
@@ -20,6 +21,7 @@ public:
 
     void render(const domain::model::Pose &pose,
                 const domain::model::DetectionResult &detections,
+                const domain::model::TrackingResult &tracking,
                 const domain::model::ImagePacket &frame);
 
 private:

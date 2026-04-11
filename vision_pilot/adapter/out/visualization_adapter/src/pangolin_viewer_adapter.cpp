@@ -27,8 +27,8 @@ bool PangolinViewerAdapter::stop()
 {
     return impl_->stop();
 }
-void PangolinViewerAdapter::render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::ImagePacket &frame)
+void PangolinViewerAdapter::render(const domain::model::Pose &pose, const domain::model::DetectionResult &detections, const domain::model::TrackingResult &tracking, const domain::model::ImagePacket &frame)
 {
-    impl_->render(pose, detections, frame);
+    impl_->render(pose, detections, tracking, frame);
 }
 } // namespace vp::adapter::out

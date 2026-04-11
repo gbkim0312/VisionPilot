@@ -1,10 +1,13 @@
-project(service)
+project(adapter_object_tracking)
 
 set(_INCLUDE_PUBLIC include)
 set(_INCLUDE_PRIVATE src)
 
-set(_LINK_PUBLIC_LIBRARIES vp::port_in)
-set(_LINK_PRIVATE_LIBRARIES  vp::port_out vp::model gaia::gaia)
+set(_LINK_PUBLIC_LIBRARIES vp::model vp::config vp::port_out)
+set(_LINK_PRIVATE_LIBRARIES
+    Eigen3::Eigen
+)
+
 
 file(GLOB DEPS CONFIGURE_DEPENDS "src/*")
 set(ALL_DEPS ${ALL_DEPS} ${DEPS})
@@ -13,6 +16,10 @@ add_library(${PROJECT_NAME} STATIC
     ${ALL_DEPS})
 
 add_library(vp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+#target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GLES)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CLANG_TIDY "")
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC ${_INCLUDE_PUBLIC}
@@ -31,6 +38,9 @@ set(_INCLUDE_PRIVATE ${_INCLUDE_PRIVATE} gtest)
 set(_LINK_PRIVATE_LIBRARIES ${_LINK_PRIVATE_LIBRARIES} gtest gmock opencv_highgui)
 
 add_executable(${PROJECT_NAME}_test ${ALL_DEPS})
+
+#target_compile_definitions(${PROJECT_NAME}_test PRIVATE HAVE_GLES)
+
 target_include_directories(
   ${PROJECT_NAME}_test
   PUBLIC ${_INCLUDE_PUBLIC}
@@ -38,7 +48,7 @@ target_include_directories(
 target_link_libraries(
   ${PROJECT_NAME}_test
   PUBLIC ${_LINK_PUBLIC_LIBRARIES}
-  PRIVATE ${_LINK_PRIVATE_LIBRARIES} vp::adapter_visualization vp::adapter_vslam vp::adapter_yolov8 vp::adapter_object_tracking)
+  PRIVATE ${_LINK_PRIVATE_LIBRARIES})
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_test)
 

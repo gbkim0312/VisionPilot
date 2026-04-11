@@ -10,6 +10,7 @@
 #include "yolov8_adapter.hpp"
 
 #include "none_viewer_adapter.hpp"
+#include "object_tracking_adapter.hpp"
 #include "opencv_viewer_adapter.hpp"
 #include "pangolin_viewer_adapter.hpp"
 #include "socket_viewer_adapter.hpp"
@@ -27,6 +28,7 @@ public:
     vp::port::out::LocalizationPort &getLocalizationPort();
     vp::port::out::VisualizationPort &getVisualizationPort();
     vp::port::out::ObjectDetectionPort &getObjectDetectionPort();
+    vp::port::out::ObjectTrackingPort &getObjectTrackingPort();
 
 private:
     const config::AssemblyConfig &config_;
@@ -39,6 +41,7 @@ private:
     std::unique_ptr<vp::adapter::out::OpenCVViewerAdapter> opencv_viewer_adapter_;
     std::unique_ptr<vp::adapter::out::PangolinViewerAdapter> pangolin_viewer_adapter_;
     std::unique_ptr<vp::adapter::out::SocketViewerAdapter> socket_viewer_adapter_;
+    std::unique_ptr<vp::adapter::out::ObjectTrackingAdapter> object_tracking_adapter_;
 
     std::unique_ptr<vp::adapter::out::YOLOv8Adapter> yolo_v8_adapter_;
     std::unique_ptr<vp::adapter::out::NoDetectionAdapter> no_detection_adapter_;

@@ -1,4 +1,5 @@
 #include "gaia_dir.hpp"
+#include "object_tracking_adapter.hpp"
 #include "opencv_viewer_adapter.hpp"
 #include "stella_vslam_adapter.hpp"
 #include "vision_pilot_service.hpp"
@@ -48,8 +49,9 @@ protected:
         localization_adapter_ = std::make_unique<adapter::out::StellaVslamAdapter>(vslam_config_);
         visualization_adapter_ = std::make_unique<adapter::out::OpenCVViewerAdapter>(vslam_viewer_config_);
         object_detection_adapter_ = std::make_unique<adapter::out::YOLOv8Adapter>(detection_config);
+        object_tracking_adapter_ = std::make_unique<adapter::out::ObjectTrackingAdapter>();
 
-        vision_pilot_service_ = std::make_unique<VisionPilotService>(*localization_adapter_, *visualization_adapter_, *object_detection_adapter_);
+        vision_pilot_service_ = std::make_unique<VisionPilotService>(*localization_adapter_, *visualization_adapter_, *object_detection_adapter_, *object_tracking_adapter_);
 
         //  유틸리티를 사용한 이미지 파일 목록 읽기
         std::string image_dir = vp::joinDir(kitti_base, "image_0");
@@ -83,6 +85,7 @@ protected:
         localization_adapter_.reset();
         visualization_adapter_.reset();
         object_detection_adapter_.reset();
+        object_tracking_adapter_.reset();
         vision_pilot_service_.reset();
         // 정리 코드
     }
@@ -117,6 +120,7 @@ protected:
     std::unique_ptr<adapter::out::StellaVslamAdapter> localization_adapter_ = nullptr;
     std::unique_ptr<adapter::out::OpenCVViewerAdapter> visualization_adapter_ = nullptr;
     std::unique_ptr<adapter::out::YOLOv8Adapter> object_detection_adapter_ = nullptr;
+    std::unique_ptr<adapter::out::ObjectTrackingAdapter> object_tracking_adapter_ = nullptr;
 
     std::unique_ptr<VisionPilotService> vision_pilot_service_ = nullptr;
 };

@@ -28,7 +28,7 @@ bool SocketViewerAdapterImpl::stop() const
     return true;
 }
 
-void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, const domain::model::DetectionResult & /* detections */, const domain::model::ImagePacket & /* frame */)
+void SocketViewerAdapterImpl::render(const domain::model::Pose & /* pose */, const domain::model::DetectionResult & /* detections */, const domain::model::TrackingResult & /* tracking */, const domain::model::ImagePacket & /* frame */)
 {
     LOG_TRA("");
 }
